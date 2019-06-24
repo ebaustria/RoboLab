@@ -9,8 +9,6 @@ class ExampleTestPlanet(unittest.TestCase):
         """
         Instantiates the planet data structure and fills it with paths
 
-        example planet:
-
         +--+
         |  |
         +-0,3------+
@@ -24,21 +22,22 @@ class ExampleTestPlanet(unittest.TestCase):
         (start)
 
         """
-
-        # set your data structure
+        # Initialize your data structure here
         self.planet = Planet()
-
-        # add the paths
         self.planet.add_path(((0, 0), Direction.NORTH), ((0, 1), Direction.SOUTH), 1)
         self.planet.add_path(((0, 1), Direction.WEST), ((0, 0), Direction.WEST), 1)
 
     def test_target_not_reachable_with_loop(self):
-        # does the shortest path algorithm loop infinitely?
-        # there is no shortest path
+        """
+        This test should check that the shortest-path algorithm does not get stuck in a loop between two points while
+        searching for a target not reachable nearby
+
+        Result: Target is not reachable
+        """
         self.assertIsNone(self.planet.shortest_path((0, 0), (1, 2)))
 
 
-class YourFirstTestPlanet(unittest.TestCase):
+class RoboLabPlanetTests(unittest.TestCase):
     def setUp(self):
         """
         Instantiates the planet data structure and fills it with paths
@@ -46,38 +45,61 @@ class YourFirstTestPlanet(unittest.TestCase):
         MODEL YOUR TEST PLANET HERE (if you'd like):
 
         """
-        # set your data structure
+        # Initialize your data structure here
         self.planet = Planet()
-
-        # ADD YOUR PATHS HERE:
         # self.planet.add_path(...)
 
     def test_integrity(self):
-        # were all paths added correctly to the planet
-        # check if add_path() works by using get_paths()
+        """
+        This test should check that the dictionary returned by "planet.get_paths()" matches the expected structure
+        """
         self.fail('implement me!')
 
     def test_empty_planet(self):
+        """
+        This test should check that an empty planet really is empty
+        """
+        self.fail('implement me!')
+
+    def test_target(self):
+        """
+        This test should check that the shortest-path algorithm implemented works.
+
+        Requirement: Minimum distance is three nodes (two paths in list returned)
+        """
         self.fail('implement me!')
 
     def test_target_not_reachable(self):
-        self.fail('implement me!')
-
-    def test_shortest_path(self):
-        # at least 2 possible paths
+        """
+        This test should check that a target outside the map or at an unexplored node is not reachable
+        """
         self.fail('implement me!')
 
     def test_same_length(self):
-        # at least 2 possible paths with the same weight
+        """
+        This test should check that the shortest-path algorithm implemented also can return alternatives with the
+        same cost (weights)
+
+        Requirement: Minimum of two paths with same cost in list returned
+        """
         self.fail('implement me!')
 
-    def test_shortest_path_with_loop(self):
-        # does the shortest path algorithm loop infinitely?
-        # there is a shortest path
+    def test_target_with_loop(self):
+        """
+        This test should check that the shortest-path algorithm does not get stuck in a loop between two points while
+        searching for a target nearby
+
+        Result: Target is reachable
+        """
         self.fail('implement me!')
 
     def test_target_not_reachable_with_loop(self):
-        # there is no shortest path
+        """
+        This test should check that the shortest-path algorithm does not get stuck in a loop between two points while
+        searching for a target not reachable nearby
+
+        Result: Target is not reachable
+        """
         self.fail('implement me!')
 
 
