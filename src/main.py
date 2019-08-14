@@ -2,6 +2,7 @@
 
 import ev3dev.ev3 as ev3
 import logging
+import os
 import paho.mqtt.client as mqtt
 import uuid
 
@@ -23,7 +24,8 @@ def run():
                          clean_session=False,  # We want to be remembered
                          protocol=mqtt.MQTTv31  # Define MQTT protocol version
                          )
-    logging.basicConfig(filename='../logs/project.log',  # Define log file
+    log_file = os.path.realpath(__file__) + '../logs/project.log'
+    logging.basicConfig(filename=log_file,  # Define log file
                         level=logging.DEBUG,  # Define default mode
                         format='%(asctime)s: %(message)s'  # Define default logging format
                         )
