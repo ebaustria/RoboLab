@@ -80,7 +80,7 @@ class RoboLabPlanetTests(unittest.TestCase):
         This test should check that the shortest-path algorithm implemented also can return alternatives with the
         same cost (weights)
 
-        Requirement: Minimum of two paths with same cost in list returned
+        Requirement: Minimum of two paths with same cost exists, only one is returned by the logic implemented
         """
         self.fail('implement me!')
 
