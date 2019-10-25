@@ -11,5 +11,3 @@ Template for the RoboLab course in spring which is conducted by the Systems Engi
 
 Please consult the [RoboLab Docs](https://robolab.inf.tu-dresden.de).
 We provide extensive sections about this template, the deploy script and the interfaces.
-
-> **The docs are accessible via the campus network of TU Dresden only.**
