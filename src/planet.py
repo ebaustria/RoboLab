@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
 # Attention: Do not import the ev3dev.ev3 module in this file
-from enum import Enum, unique
+from enum import IntEnum, unique
 from typing import List, Optional, Tuple, Dict
 
 
 @unique
-class Direction(Enum):
+class Direction(IntEnum):
     """ Directions in shortcut """
-    NORTH = "N"
-    EAST = "E"
-    SOUTH = "S"
-    WEST = "W"
+    NORTH = 0
+    EAST = 90
+    SOUTH = 180
+    WEST = 270
 
 
 Weight = int
@@ -73,7 +73,7 @@ class Planet:
         pass
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
-        List[Tuple[Tuple[int, int], Direction]]]:
+        None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
 

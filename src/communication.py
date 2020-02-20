@@ -2,6 +2,7 @@
 
 # Attention: Do not import the ev3dev.ev3 module in this file
 import json
+import paho.mqtt.client.ssl as ssl
 
 
 class Communication:
@@ -17,8 +18,9 @@ class Communication:
         :param mqtt_client: paho.mqtt.client.Client
         :param logger: logging.Logger
         """
-        # DO NOT CHANGE THESE VARIABLES
+        # DO NOT CHANGE THE SETUP HERE
         self.client = mqtt_client
+        self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
 
