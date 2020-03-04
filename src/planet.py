@@ -2,7 +2,7 @@
 
 # Attention: Do not import the ev3dev.ev3 module in this file
 from enum import IntEnum, unique
-from typing import List, Optional, Tuple, Dict
+from typing import List, Tuple, Dict, Union
 
 
 @unique
@@ -15,7 +15,7 @@ class Direction(IntEnum):
 
 
 Weight = int
-""" 
+"""
 Weight of a given path (received from the server)
 
 Value:  -1 if blocked path
@@ -72,8 +72,7 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         pass
 
-    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
-        None, List[Tuple[Tuple[int, int], Direction]]]:
+    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
 
