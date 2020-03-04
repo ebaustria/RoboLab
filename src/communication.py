@@ -2,7 +2,7 @@
 
 # Attention: Do not import the ev3dev.ev3 module in this file
 import json
-import paho.mqtt.client.ssl as ssl
+import ssl
 
 
 class Communication:
