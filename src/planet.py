@@ -58,7 +58,8 @@ class Planet:
             {
                 (0, 3): {
                     Direction.NORTH: ((0, 3), Direction.WEST, 1),
-                    Direction.EAST: ((1, 3), Direction.WEST, 2)
+                    Direction.EAST: ((1, 3), Direction.WEST, 2),
+                    Direction.WEST: ((0, 3), Direction.NORTH, 1)
                 },
                 (1, 3): {
                     Direction.WEST: ((0, 3), Direction.EAST, 2),
