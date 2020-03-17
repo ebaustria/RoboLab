@@ -2,7 +2,12 @@
 
 # Attention: Do not import the ev3dev.ev3 module in this file
 import json
+import platform
 import ssl
+
+# Fix: SSL certificate problem on macOS
+if all(platform.mac_ver()):
+    from OpenSSL import SSL
 
 
 class Communication:
