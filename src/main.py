@@ -4,7 +4,6 @@ import ev3dev.ev3 as ev3
 import logging
 import os
 import paho.mqtt.client as mqtt
-import uuid
 
 from communication import Communication
 from odometry import Odometry
@@ -20,9 +19,10 @@ def run():
     # Your script isn't able to close the client after crashing.
     global client
 
-    client = mqtt.Client(client_id=str(uuid.uuid4()),  # Unique Client-ID to recognize our program
-                         clean_session=False,  # We want to be remembered
-                         protocol=mqtt.MQTTv31  # Define MQTT protocol version
+    client_id = 'brick-YOURGROUPID'  # Replace YOURGROUPID with your group ID
+    client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
+                         clean_session=True,  # We want a clean session after disconnect or abort/crash
+                         protocol=mqtt.MQTTv311  # Define MQTT protocol version
                          )
     log_file = os.path.realpath(__file__) + '/../../logs/project.log'
     logging.basicConfig(filename=log_file,  # Define log file

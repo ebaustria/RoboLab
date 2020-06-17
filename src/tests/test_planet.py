@@ -38,7 +38,7 @@ class ExampleTestPlanet(unittest.TestCase):
         self.assertIsNone(self.planet.shortest_path((0, 0), (1, 2)))
 
 
-class RoboLabPlanetTests(unittest.TestCase):
+class TestRoboLabPlanet(unittest.TestCase):
     def setUp(self):
         """
         Instantiates the planet data structure and fills it with paths
@@ -78,8 +78,8 @@ class RoboLabPlanetTests(unittest.TestCase):
 
     def test_same_length(self):
         """
-        This test should check that the shortest-path algorithm implemented also can return alternatives with the
-        same cost (weights)
+        This test should check that the shortest-path algorithm implemented also can return alternative routes with the
+        same cost (weight) to a specific target
 
         Requirement: Minimum of two paths with same cost exists, only one is returned by the logic implemented
         """

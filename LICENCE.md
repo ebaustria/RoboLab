@@ -1,8 +1,8 @@
 The MIT License (MIT)
 
-Copyright (c) 2017-2018 Lutz Thies
+Copyright (c) 2017-2020 TU Dresden, Chair for Systems Engineering 
 
-Other contributors: Frank Busse, Felix Döring, Paul Genssler, Felix Wittwer,
+Other contributors: Lutz Thies, Frank Busse, Felix Döring, Paul Genssler, Felix Wittwer,
                     Max Friedrich, Ian List, Kilian Koeltzsch and 
                     Sinthujan Thanabalasingam
 
