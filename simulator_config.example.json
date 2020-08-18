@@ -89,7 +89,7 @@
       "port": "outB",
       "#port_description": "The port this motor is connected to (outA, outB, outC, outD)",
       "polarity_inverted": false,
-      "#polarity_inverted_description": "If your programm uses motors with inverted polarity (most dont), set this to true"
+      "#polarity_inverted_description": "If your program uses motors with inverted polarity (most dont), set this to true"
     },
     "right": {
       "#description": "see left",
@@ -108,9 +108,9 @@
     "SLEEP: 1",
     "RELEASE: ENTER  #Releases the 'ENTER' button on the robot",
     "MOVEOVER: WHITE  #Moves the color-sensor over the planet-background",
-    "PUSH: in1  #Pushes the touch-sensor connected to port 'in1'",
+    "PUSH: in3  #Pushes the touch-sensor connected to port 'in3'",
     "SLEEP: 1",
-    "RELEASE: in1 #Releases the touch-sensor conncted to port 'in1'",
+    "RELEASE: in3 #Releases the touch-sensor connected to port 'in3'",
     "MOVEOVER: BLACK  #Moves the color-sensor over the center of the start-line",
     "INPUT: black #Enters the text 'black' into the console and presses enter. For use with the python input(). Can also be used without text.",
     "SLEEP: 2.5",
