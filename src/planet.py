@@ -24,6 +24,16 @@ Value:  -1 if blocked path
 """
 
 
+class Path:
+
+    def __init__(self, start, target, weight, start_dir, end_dir):
+        self.start = start
+        self.target = target
+        self.weight = weight
+        self.start_dir = start_dir
+        self.end_dir = end_dir
+
+
 class Planet:
     """
     Contains the representation of the map and provides certain functions to manipulate or extend
@@ -33,6 +43,7 @@ class Planet:
     def __init__(self):
         """ Initializes the data structure """
         self.target = None
+        self.planet_dict = {}
 
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
@@ -48,7 +59,23 @@ class Planet:
         """
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        path_to_add = Path(start[0], target[0], weight, start[1], target[1])
+        # self.planet_dict[path_to_add.start] = {}
+
+        if path_to_add.start not in self.planet_dict:
+            self.planet_dict[path_to_add.start] = {}
+            self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
+                                                                          path_to_add.weight)
+        else:
+            self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
+                                                                          path_to_add.weight)
+        if path_to_add.target not in self.planet_dict and path_to_add.target is not None:
+            self.planet_dict[path_to_add.target] = {}
+            self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
+                                                                         path_to_add.weight)
+        else:
+            self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
+                                                                         path_to_add.weight)
 
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
@@ -71,7 +98,7 @@ class Planet:
         """
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        return self.planet_dict
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """

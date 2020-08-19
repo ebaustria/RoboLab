@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from planet import Direction, Planet
+from src.planet import Direction, Planet
 
 
 class ExampleTestPlanet(unittest.TestCase):
@@ -48,19 +48,38 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         # Initialize your data structure here
         self.planet = Planet()
-        # self.planet.add_path(...)
+
+        self.planet.add_path(((0, 0), Direction.EAST), ((2, 0), Direction.WEST), 2)
+        self.planet.add_path(((0, 0), Direction.NORTH), ((0, 2), Direction.SOUTH), 1)
+        self.planet.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 4)
+        self.planet.add_path(((2, 2), Direction.SOUTH), ((2, 0), Direction.NORTH), 2)
+        self.planet.add_path(((1, 2), Direction.WEST), ((1, 2), Direction.NORTH), 1)
 
     def test_integrity(self):
         """
         This test should check that the dictionary returned by "planet.get_paths()" matches the expected structure
         """
-        self.fail('implement me!')
+
+        b = self.planet.get_paths()
+        self.assertEqual({(0, 0): {Direction.EAST: ((2, 0), Direction.WEST, 2),
+                                   Direction.NORTH: ((0, 2), Direction.SOUTH, 1)},
+                          (1, 2): {Direction.NORTH: ((1, 2), Direction.WEST, 1),
+                                   Direction.WEST: ((1, 2), Direction.NORTH, 1)},
+                          (2, 0): {Direction.WEST: ((0, 0), Direction.EAST, 2),
+                                   Direction.NORTH: ((2, 2), Direction.SOUTH, 2)},
+                          (0, 2): {Direction.SOUTH: ((0, 0), Direction.NORTH, 1),
+                                   Direction.EAST: ((2, 2), Direction.WEST, 4)},
+                          (2, 2): {Direction.WEST: ((0, 2), Direction.EAST, 4),
+                                   Direction.SOUTH: ((2, 0), Direction.NORTH, 2)}}, b)
 
     def test_empty_planet(self):
         """
         This test should check that an empty planet really is empty
         """
-        self.fail('implement me!')
+        self.p = Planet()
+        empty_planet = self.p.planet_dict
+
+        self.assertFalse(empty_planet)
 
     def test_target(self):
         """
