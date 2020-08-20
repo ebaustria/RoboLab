@@ -67,34 +67,231 @@ class Communication:
 
         # YOUR CODE FOLLOWS
 
+        # Get type of payload
         payload_type = payload["type"]
 
         # testplanet-Message
         if payload_type == "notice":
-            pass
+            """
+            Contains some helpful information
+            {
+                "from": "debug",
+                "type": "notice",
+                "payload": {
+                    "message": "active planet: <PLANET_NAME>"
+                }
+            }
+            """
+
+            # Read and print message
+            msg = payload["payload"]["message"]
+            self.logger.debug(msg)
         # ready-Message
         elif payload_type == "planet":
-            pass
-        # pat-Message
+            """
+            Contains information about the planet name
+            and the start position and orientation
+            {
+                "from": "server",
+                "type": "planet",
+                "payload": {
+                    "planetName": "<PLANET_NAME>",
+                    "startX": <X>,
+                    "startY": <Y>,
+                    "startOrientation": <O>
+                }
+            }
+            """
+
+            # Read information from payload
+            self.planet_name = payload["payload"]["planetName"]
+            start_x = payload["payload"]["startX"]
+            start_y = payload["payload"]["startY"]
+            start_dir = payload["payload"]["startOrientation"]
+
+            start = ((start_x, start_y), start_dir)
+
+            # TODO use start and name somewhere 
+
+            # Subscribe to planet channel
+            self.client.subscribe('planet/%s/117' % self.planet_name, qos=1)
+        # path-Message
         elif payload_type == "path":
+            """
+            Contains information about the last taken path,
+            its weight and some corrected positions
+            start = end and weight = -1 if blocked
+            {
+                "from": "server",
+                "type": "path",
+                "payload": {
+                    "startX": <Xs>,
+                    "startY": <Ys>,
+                    "startDirection": <Ds>,
+                    "endX": <Xc>,
+                    "endY": <Yc>,
+                    "endDirection": <Dc>,
+                    "pathStatus": "free|blocked",
+                    "pathWeight": <weight>
+                }
+            }
+            """
+
+            start_x = payload["payload"]["startX"]
+            start_y = payload["payload"]["startY"]
+            start_dir = payload["payload"]["startDirection"]
+            end_x = payload["payload"]["endX"]
+            end_y = payload["payload"]["endY"]
+            end_dir = payload["payload"]["endDirection"]
+            blocked = payload["payload"]["pathStatus"]
+            weight = payload["payload"]["pathWeight"]
+
+            start = ((start_x, start_y), start_dir)
+            end = ((end_x, end_y), end_dir)
+
+            # TODO add Path to planet and check if it's blocked
+            if blocked:
+                pass
+            else:
+                pass
+
             pass
         # pathSelect-Message
         elif payload_type == "pathSelect":
+            """
+            Contains information about the real orientation
+            {
+                "from": "server",
+                "type": "pathSelect",
+                "payload": {
+                    "startDirection": <Dc>
+                }
+            }
+            """
+
+            start_dir = payload["payload"]["startDirection"]
+
+            # TODO use direction to correct data
+
             pass
         # pathUnveiled-Message
         elif payload_type == "pathUnveiled":
+            """
+            Contains information about a path which the roboter
+            doesn't need to explore anymore
+            {
+                "from": "server",
+                "type": "pathUnveiled",
+                "payload": {
+                    "startX": <Xs>,
+                    "startY": <Ys>,
+                    "startDirection": <Ds>,
+                    "endX": <Xe>,
+                    "endY": <Ye>,
+                    "endDirection": <De>,
+                    "pathStatus": "free|blocked",
+                    "pathWeight": <weight>
+                }
+            }
+            """
+
+            start_x = payload["payload"]["startX"]
+            start_y = payload["payload"]["startY"]
+            start_dir = payload["payload"]["startDirection"]
+            end_x = payload["payload"]["endX"]
+            end_y = payload["payload"]["endY"]
+            end_dir = payload["payload"]["endDirection"]
+            blocked = payload["payload"]["pathStatus"]
+            weight = payload["payload"]["pathWeight"]
+
+            start = ((start_x, start_y), start_dir)
+            end = ((end_x, end_y), end_dir)
+
+            # TODO add Path to planet and check if it's blocked
+            if blocked:
+                pass
+            else:
+                pass
+
             pass
         # target-Message
         elif payload_type == "target":
+            """
+            Contains information about the planet target
+            {
+                "from": "server",
+                "type": "target",
+                "payload": {
+                    "targetX": <Xt>,
+                    "targetY": <Yt>
+                }
+            }
+            """
+
+            target_x = payload["payload"]["targetX"]
+            target_y = payload["payload"]["targetY"]
+            
+            target = (target_x, target_y)
+            
+            # TODO set global target and check if it's reachable
+
             pass
         # done-Message
         elif payload_type == "done":
+            """
+            Received if roboter finished the planet
+            {
+                "from": "server",
+                "type": "done",
+                "payload": {
+                    "message": "<TEXT>"
+                }
+            }
+            """
+
+            msg = payload["payload"]["message"]
+            self.logger.debug(msg)
+
+            # TODO exit programm
+
             pass
         # syntax-Message
-        elif payload_type == "debug":
-            pass
+        elif payload_type == "syntax":
+            """
+            Contains information about the syntax correctnes
+            of sended code
+            {
+                "from": "debug",
+                "type": "syntax",
+                "payload": {
+                    "message": "Correct"
+                }
+            }
+            or
+            {
+                "from": "debug",
+                "type": "syntax",
+                "payload": {
+                    "message": "Incorrect",
+                    "errors": [
+                        "Invalid field: <FIELDNAME>",
+                        "Missing field: <FIELDNAME>",
+                        "Unknow from: <VALUE>",
+                        "Unknow type: <VALUE>",
+                    ]
+                }
+            }
+            """
+            
+            # Get and print if sendet code was correct
+            msg = payload["payload"]["message"]
+            if msg == "Correct":
+                self.logger.debug("Correct syntax")
+            else:
+                errors = payload["payload"]["errors"]
+                self.logger.debug("Error: " + errors)
         else:
-            raise ReferenceError()
+            raise "Invalid Messagetype"
 
 
     def send_planet_name(self, name: str):
@@ -149,7 +346,7 @@ class Communication:
         """
         Sends to the mothership the path-Message 
         with the information about the path and
-        if it's blocked
+        if it's blocked (start and end positions are the same)
 
         publish to planet/<PLANET>/117
         {
@@ -287,7 +484,7 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS
-        self.client.publish(topic, message)
+        self.client.publish(topic, payload=message, qos=1)
 
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
