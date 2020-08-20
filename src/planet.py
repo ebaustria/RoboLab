@@ -44,6 +44,7 @@ class Planet:
         """ Initializes the data structure """
         self.target = None
         self.planet_dict = {}
+        self.blocked_paths = []
 
     # If the start point of the path to add is not in the planet dictionary, an entry is created for it. The key is the
     # start point, and the value is a dictionary. The start direction is added to the inner dictionary as a key. A tuple
@@ -105,6 +106,13 @@ class Planet:
         """
 
         return self.planet_dict
+
+    def add_blocked_path(self, path: Path):
+        entry = (path.start, path.start_dir)
+        self.blocked_paths.append(entry)
+
+    def get_blocked_paths(self) -> List[Tuple[Tuple[int, int], Direction]]:
+        return self.blocked_paths
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
         """
