@@ -45,6 +45,14 @@ class Planet:
         self.target = None
         self.planet_dict = {}
 
+    # If the start point of the path to add is not in the planet dictionary, an entry is created for it. The key is the
+    # start point, and the value is a dictionary. The start direction is added to the inner dictionary as a key. A tuple
+    # consisting of the target point, the end direction, and the edge weight is added as the value of the start
+    # direction. If the start point is in the planet dictionary, the value-tuple of the start direction is updated with
+    # new values. This process is then repeated for the opposite direction (target point and end direction as keys),
+    # with the additional condition that the target point is not None (prevents None from being added to the planet
+    # dictionary as a key).
+
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
         """
@@ -60,7 +68,6 @@ class Planet:
 
         # YOUR CODE FOLLOWS (remove pass, please!)
         path_to_add = Path(start[0], target[0], weight, start[1], target[1])
-        # self.planet_dict[path_to_add.start] = {}
 
         if path_to_add.start not in self.planet_dict:
             self.planet_dict[path_to_add.start] = {}
@@ -97,7 +104,6 @@ class Planet:
         :return: Dict
         """
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
         return self.planet_dict
 
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
