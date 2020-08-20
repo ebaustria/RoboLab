@@ -34,7 +34,10 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
-    print("Hello World!")
+    com = Communication(client, logger)
+
+
+    del com
 
 
 # DO NOT EDIT

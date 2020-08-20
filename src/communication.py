@@ -4,8 +4,9 @@
 import json
 import platform
 import ssl
+from typing import Tuple
 
-from planet import Path, Planet
+from src.planet import Path, Planet, Direction
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -31,12 +32,16 @@ class Communication:
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
 
+        self.planet_name = None
+
         self.client.username_pw_set('117', password='0QOfuyjhr0') # Your group credentials
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
 
-        # TODO Add subscriber
+        # Main channel
         self.client.subscribe('explorer/117', qos=1)
 
+        # Syntax check channel
+        self.client.subscribe('comtest/117', qos=1)
 
         self.logger = logger
 
@@ -60,7 +65,7 @@ class Communication:
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
+        # YOUR CODE FOLLOWS
 
         payload_type = payload["type"]
 
@@ -85,6 +90,9 @@ class Communication:
         # done-Message
         elif payload_type == "done":
             pass
+        # syntax-Message
+        elif payload_type == "debug":
+            pass
         else:
             raise ReferenceError()
 
@@ -92,7 +100,6 @@ class Communication:
     def send_planet_name(self, name: str):
         """
         Sends to the mothership the testplanet-Message
-        :param name: String
 
         publish to explorer/117
         {
@@ -103,15 +110,17 @@ class Communication:
             }
         }
         """
-        pass
 
+        payload = {
+            "from": "client",
+            "type": "testplanet",
+            "payload": {
+                "planetName": name
+            }
+        }
 
-    def register_planet(self, name: str):
-        """
-        
-        :param name: String
-        """
-        pass
+        message = json.dumps(payload)
+        self.send_message("explorer/117", message)
 
 
     def send_ready(self):
@@ -124,14 +133,144 @@ class Communication:
             "type": "ready"
         }
         """
+
+        payload = {
+            "from": "client",
+            "type": "ready"
+        }
+
+        message = json.dumps(payload)
+        self.send_message("explorer/117", message)
+
         pass
 
 
     def send_path(self, path: Path, blocked: bool):
-        pass
+        """
+        Sends to the mothership the path-Message 
+        with the information about the path and
+        if it's blocked
+
+        publish to planet/<PLANET>/117
+        {
+            "from": "client",
+            "type": "path",
+            "payload": {
+                "startX": <Xs>,
+                "startY": <Ys>,
+                "startDirection": <Ds>,
+                "endX": <Xe>,
+                "endY": <Ye>,
+                "endDirection": <De>,
+                "pathStatus": "free|blocked"
+            }
+        }
+        """
+
+        path_status = "blocked" if blocked else "free"
+
+        payload = {
+            "from": "client",
+            "type": "path",
+            "payload": {
+                "startX": path.start[0],
+                "startY": path.start[1],
+                "startDirection": path.start_dir,
+                "endX": path.target[0],
+                "endY": path.target[1],
+                "endDirection": path.end_dir,
+                "pathStatus": path_status
+            }
+        }
+
+        message = json.dumps(payload)
+        self.send_message("planet/%s/117" % self.planet_name, message)
         
 
-    
+    def send_select_path(self, choice: Tuple[Tuple[int, int], Direction]):
+        """
+        Sends to the mothership the pathSelect-Message 
+        with the information about which path roboter will take
+        
+        publish to planet/<PLANET>/117
+        {
+            "from": "client",
+            "type": "pathSelect",
+            "payload": {
+                "startX": <Xs>,
+                "startY": <Ys>,
+                "startDirection": <Ds>
+            }
+        }
+        """
+
+        payload = {
+            "from": "client",
+            "type": "pathSelect",
+            "payload": {
+                "startX": choice[0][0],
+                "startY": choice[0][1],
+                "startDirection": choice[1]
+            }
+        }
+
+        message = json.dumps(payload)
+        self.send_message("planet/%s/117" % self.planet_name, message)
+        
+
+    def send_target_reached(self, msg: str):
+        """
+        Sends to the mothership the targetReached-Message 
+        Used when target is reached
+
+        publish to planet/<PLANET>/117
+        {
+            "from": "client",
+            "type": "targetReached",
+            "payload": {
+                "message": "<TEXT>"
+            }
+        }
+        """
+
+        payload = {
+            "from": "client",
+            "type": "targetReached",
+            "payload": {
+                "message": msg
+            }
+        }
+
+        message = json.dumps(payload)
+        self.send_message("planet/%s/117" % self.planet_name, message)
+        
+
+    def send_exploration_completed(self, msg: str):
+        """
+        Sends to the mothership the explorationCompleted-Message 
+        Used when planet is completely explored
+
+        publish to planet/<PLANET>/117
+        {
+            "from": "client",
+            "type": "explorationCompleted",
+            "payload": {
+                "message": "<TEXT>"
+            }
+        }
+        """
+        
+        payload = {
+            "from": "client",
+            "type": "explorationCompleted",
+            "payload": {
+                "message": msg
+            }
+        }
+
+        message = json.dumps(payload)
+        self.send_message("planet/%s/117" % self.planet_name, message)
+
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -147,8 +286,9 @@ class Communication:
         self.logger.debug('Send to: ' + topic)
         self.logger.debug(json.dumps(message, indent=2))
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        # YOUR CODE FOLLOWS
+        self.client.publish(topic, message)
+
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #
