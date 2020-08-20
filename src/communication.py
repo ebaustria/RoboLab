@@ -6,7 +6,7 @@ import platform
 import ssl
 from typing import Tuple
 
-from src.planet import Path, Planet, Direction
+from planet import Path, Planet, Direction
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -39,9 +39,6 @@ class Communication:
 
         # Main channel
         self.client.subscribe('explorer/117', qos=1)
-
-        # Syntax check channel
-        self.client.subscribe('comtest/117', qos=1)
 
         self.logger = logger
 
@@ -255,41 +252,6 @@ class Communication:
             # TODO exit programm
 
             pass
-        # syntax-Message
-        elif payload_type == "syntax":
-            """
-            Contains information about the syntax correctnes
-            of sended code
-            {
-                "from": "debug",
-                "type": "syntax",
-                "payload": {
-                    "message": "Correct"
-                }
-            }
-            or
-            {
-                "from": "debug",
-                "type": "syntax",
-                "payload": {
-                    "message": "Incorrect",
-                    "errors": [
-                        "Invalid field: <FIELDNAME>",
-                        "Missing field: <FIELDNAME>",
-                        "Unknow from: <VALUE>",
-                        "Unknow type: <VALUE>",
-                    ]
-                }
-            }
-            """
-            
-            # Get and print if sendet code was correct
-            msg = payload["payload"]["message"]
-            if msg == "Correct":
-                self.logger.debug("Correct syntax")
-            else:
-                errors = payload["payload"]["errors"]
-                self.logger.debug("Error: " + errors)
         else:
             raise "Invalid Messagetype"
 
@@ -339,8 +301,6 @@ class Communication:
         message = json.dumps(payload)
         self.send_message("explorer/117", message)
 
-        pass
-
 
     def send_path(self, path: Path, blocked: bool):
         """
@@ -384,7 +344,7 @@ class Communication:
         self.send_message("planet/%s/117" % self.planet_name, message)
         
 
-    def send_select_path(self, choice: Tuple[Tuple[int, int], Direction]):
+    def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
         """
         Sends to the mothership the pathSelect-Message 
         with the information about which path roboter will take

@@ -2,8 +2,9 @@
 
 import unittest.mock
 import paho.mqtt.client as mqtt
+import json
 
-from src.communication import Communication
+from communication import Communication
 
 
 class TestRoboLabCommunication(unittest.TestCase):
@@ -21,11 +22,36 @@ class TestRoboLabCommunication(unittest.TestCase):
         # Initialize your data structure here
         self.communication = Communication(client, mock_logger)
 
+        # Syntax check channel
+        client.subscribe('comtest/117', qos=1)
+
+        self.ready_cor = {
+            "from": "client",
+            "type": "ready"
+        }
+
+
+    def __del__(self):
+        del self.communication
+
+
     def test_message_ready(self):
-        """
-        This test should check the syntax of the message type "ready"
-        """
-        self.fail('implement me!')
+        message = json.dumps(self.ready_cor)
+        self.communication.send_message("comtest/117", message)
+
+        finished = False
+
+        def test(self, client, data, message):
+            payload = json.loads(message.payload.decode('utf-8'))
+            msg = payload["payload"]["message"]
+            if msg != "Correct":
+                self.fail("Message was right")
+            finished = True
+
+        self.communication.client.on_message = test
+
+        while not finished:
+            pass
 
     def test_message_path(self):
         """
