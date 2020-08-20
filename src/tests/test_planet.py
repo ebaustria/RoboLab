@@ -87,7 +87,10 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum distance is three nodes (two paths in list returned)
         """
-        self.fail('implement me!')
+
+        path = self.planet.shortest_path((0, 0), (2, 2))
+
+        self.assertEqual([((0, 0), Direction.EAST), ((2, 0), Direction.NORTH)], path)
 
     def test_target_not_reachable(self):
         """

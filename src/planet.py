@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Attention: Do not import the ev3dev.ev3 module in this file
+import math
 from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union
 
@@ -114,7 +115,8 @@ class Planet:
     def get_blocked_paths(self) -> List[Tuple[Tuple[int, int], Direction]]:
         return self.blocked_paths
 
-    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int], Direction]]]:
+    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int],
+                                                                                                       Direction]]]:
         """
         Returns a shortest path between two nodes
 
@@ -126,5 +128,54 @@ class Planet:
         :return: 2-Tuple[List, Direction]
         """
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        unvisited = {}
+        current_node = start
+        precursor_compass_dict = {}
+        shortest_path = []
+
+        if start == target:
+            print("Target reached\n")
+            return shortest_path
+
+        if target not in self.planet_dict.keys():
+            print("Target is unexplored or not in map for some other reason")
+            return None
+
+        for node in self.planet_dict.keys():
+            if node == start:
+                unvisited[node] = 0
+            else:
+                unvisited[node] = math.inf
+
+        while target in unvisited:
+            current_neighbors = self.planet_dict[current_node].items()
+            for (start_dir, path) in current_neighbors:
+                if path[0] in unvisited.keys() and path[2] != -1:
+                    neighbor = path[0]
+                    neighbor_weight = path[2]
+                    distance = unvisited[neighbor]
+                    if unvisited[current_node] + neighbor_weight < distance:
+                        distance = unvisited[current_node] + neighbor_weight
+                        unvisited[neighbor] = distance
+                        precursor_compass_dict[neighbor] = (current_node, start_dir)
+
+            unvisited.pop(current_node)
+
+            for (node, distance) in unvisited.items():
+                if distance == min(unvisited.values()):
+                    current_node = node
+
+        shortest_path.append(precursor_compass_dict[target])
+
+        for (coord, direc) in shortest_path:
+            if coord != start:
+                shortest_path.append(precursor_compass_dict[coord])
+
+        shortest_path.reverse()
+
+        #if shortest_path[0] is None:
+        #    print("Target is not reachable\n")
+        #    return None
+
+        print("Target is reachable\n")
+        return shortest_path
