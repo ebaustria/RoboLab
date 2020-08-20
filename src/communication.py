@@ -5,6 +5,8 @@ import json
 import platform
 import ssl
 
+from planet import Path, Planet
+
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
     from OpenSSL import SSL
@@ -29,7 +31,22 @@ class Communication:
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
 
+        self.client.username_pw_set('117', password='0QOfuyjhr0') # Your group credentials
+        self.client.connect('mothership.inf.tu-dresden.de', port=8883)
+
+        # TODO Add subscriber
+        self.client.subscribe('explorer/117', qos=1)
+
+
         self.logger = logger
+
+        self.client.loop_start()
+
+
+    def __del__(self):
+        self.client.loop_stop()
+        self.client.disconnect()
+
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def on_message(self, client, data, message):
@@ -44,7 +61,77 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
 
         # YOUR CODE FOLLOWS (remove pass, please!)
+
+        payload_type = payload["type"]
+
+        # testplanet-Message
+        if payload_type == "notice":
+            pass
+        # ready-Message
+        elif payload_type == "planet":
+            pass
+        # pat-Message
+        elif payload_type == "path":
+            pass
+        # pathSelect-Message
+        elif payload_type == "pathSelect":
+            pass
+        # pathUnveiled-Message
+        elif payload_type == "pathUnveiled":
+            pass
+        # target-Message
+        elif payload_type == "target":
+            pass
+        # done-Message
+        elif payload_type == "done":
+            pass
+        else:
+            raise ReferenceError()
+
+
+    def send_planet_name(self, name: str):
+        """
+        Sends to the mothership the testplanet-Message
+        :param name: String
+
+        publish to explorer/117
+        {
+            "from": "client",
+            "type": "testplanet",
+            "payload": {
+                "planetName": "<PLANET_NAME>"
+            }
+        }
+        """
         pass
+
+
+    def register_planet(self, name: str):
+        """
+        
+        :param name: String
+        """
+        pass
+
+
+    def send_ready(self):
+        """
+        Sends to the mothership the ready-Message
+
+        publish to explorer/117
+        {
+            "from": "client",
+            "type": "ready"
+        }
+        """
+        pass
+
+
+    def send_path(self, path: Path, blocked: bool):
+        pass
+        
+
+    
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
