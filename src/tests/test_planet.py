@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from src.planet import Direction, Planet
+from planet import Direction, Planet
 
 
 class ExampleTestPlanet(unittest.TestCase):
