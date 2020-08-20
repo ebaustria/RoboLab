@@ -134,11 +134,15 @@ class Planet:
         shortest_path = []
 
         if start == target:
-            print("Target reached\n")
+            print("Target reached.\n")
             return shortest_path
 
         if target not in self.planet_dict.keys():
-            print("Target is unexplored or not in map for some other reason")
+            print("Target is unexplored.\n")
+            return None
+
+        if not self.check_for_path(current_node, target, []):
+            print("Target is unreachable.\n")
             return None
 
         for node in self.planet_dict.keys():
@@ -177,5 +181,18 @@ class Planet:
         #    print("Target is not reachable\n")
         #    return None
 
-        print("Target is reachable\n")
+        print("Target is reachable.\n")
         return shortest_path
+
+    def check_for_path(self, current: Tuple[int, int], target: Tuple[int, int], checked: List[Tuple[int, int]]) -> bool:
+        current_neighbors = self.planet_dict[current].items()
+
+        if current == target:
+            return True
+
+        for (start_dir, path) in current_neighbors:
+            if current != path[0] and path[0] not in checked:
+                checked.append(current)
+                current = path[0]
+                return self.check_for_path(current, target, checked)
+

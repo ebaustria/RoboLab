@@ -114,7 +114,16 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is reachable
         """
-        self.fail('implement me!')
+        p = Planet()
+
+        p.add_path(((0, 0), Direction.EAST), ((2, 0), Direction.WEST), 1)
+        p.add_path(((0, 0), Direction.NORTH), ((0, 2), Direction.SOUTH), 1)
+        p.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 4)
+        p.add_path(((2, 2), Direction.SOUTH), ((2, 0), Direction.NORTH), 2)
+        p.add_path(((1, 2), Direction.WEST), ((1, 2), Direction.NORTH), 1)
+        p.add_path(((0, 0), Direction.SOUTH), ((2, 0), Direction.SOUTH), 1)
+
+        p.shortest_path((0, 0), (2, 2))
 
     def test_target_not_reachable_with_loop(self):
         """
@@ -123,7 +132,10 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is not reachable
         """
-        self.fail('implement me!')
+
+        c = self.planet.shortest_path((0, 0), (1, 2))
+
+        self.assertEqual(c, None)
 
 
 if __name__ == "__main__":
