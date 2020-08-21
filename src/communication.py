@@ -6,7 +6,7 @@ import platform
 import ssl
 from typing import Tuple
 
-from planet import Path, Planet, Direction
+from planet import Path, Direction
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -66,7 +66,7 @@ class Communication:
         payload_type = payload["type"]
 
         # testplanet-Message
-        if payload_type == "notice":
+        if payload_type in ["notice", "error", "adjust"]:
             """
             Contains some helpful information
             {

@@ -182,6 +182,10 @@ class TestRoboLabCommunication(unittest.TestCase):
         del self.communication
 
     def test_message_ready(self):
+        """
+        This test should check the syntax of the message type "ready"
+        """
+
         data = {"max": 2, "finished": 0, "failed": []}
 
         def test(client, _, message):
@@ -221,6 +225,10 @@ class TestRoboLabCommunication(unittest.TestCase):
             self.fail(m)
 
     def test_message_path(self):
+        """
+        This test should check the syntax of the message type "path"
+        """
+
         data = {"max": 3, "finished": 0, "failed": []}
 
         def test(client, _, message):
@@ -269,6 +277,10 @@ class TestRoboLabCommunication(unittest.TestCase):
             self.fail(m)
 
     def test_message_path_invalid(self):
+        """
+        This test should check the syntax of the message type "path" with errors/invalid data
+        """
+
         data = {"max": 2, "finished": 0, "failed": []}
 
         def test(client, _, message):
@@ -308,6 +320,10 @@ class TestRoboLabCommunication(unittest.TestCase):
             self.fail(m)
 
     def test_message_select(self):
+        """
+        This test should check the syntax of the message type "pathSelect"
+        """
+
         data = {"max": 4, "finished": 0, "failed": []}
 
         def test(client, _, message):
@@ -365,6 +381,10 @@ class TestRoboLabCommunication(unittest.TestCase):
             self.fail(m)
 
     def test_message_complete(self):
+        """
+        This test should check the syntax of the message type "explorationCompleted" or "targetReached"
+        """
+
         data = {"max": 8, "finished": 0, "failed": []}
 
         def test(client, _, message):
