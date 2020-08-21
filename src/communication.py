@@ -34,7 +34,7 @@ class Communication:
 
         self.planet_name = None
 
-        self.client.username_pw_set('117', password='0QOfuyjhr0') # Your group credentials
+        self.client.username_pw_set('117', password='0QOfuyjhr0')  # Your group credentials
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
 
         # Main channel
@@ -44,11 +44,9 @@ class Communication:
 
         self.client.loop_start()
 
-
     def __del__(self):
         self.client.loop_stop()
         self.client.disconnect()
-
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def on_message(self, client, data, message):
@@ -253,8 +251,7 @@ class Communication:
 
             pass
         else:
-            raise "Invalid Messagetype"
-
+            raise Exception("Invalid Messagetype")
 
     def send_planet_name(self, name: str):
         """
@@ -281,7 +278,6 @@ class Communication:
         message = json.dumps(payload)
         self.send_message("explorer/117", message)
 
-
     def send_ready(self):
         """
         Sends to the mothership the ready-Message
@@ -300,7 +296,6 @@ class Communication:
 
         message = json.dumps(payload)
         self.send_message("explorer/117", message)
-
 
     def send_path(self, path: Path, blocked: bool):
         """
@@ -343,7 +338,6 @@ class Communication:
         message = json.dumps(payload)
         self.send_message("planet/%s/117" % self.planet_name, message)
         
-
     def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
         """
         Sends to the mothership the pathSelect-Message 
@@ -374,7 +368,6 @@ class Communication:
         message = json.dumps(payload)
         self.send_message("planet/%s/117" % self.planet_name, message)
         
-
     def send_target_reached(self, msg: str):
         """
         Sends to the mothership the targetReached-Message 
@@ -401,7 +394,6 @@ class Communication:
         message = json.dumps(payload)
         self.send_message("planet/%s/117" % self.planet_name, message)
         
-
     def send_exploration_completed(self, msg: str):
         """
         Sends to the mothership the explorationCompleted-Message 
@@ -428,7 +420,6 @@ class Communication:
         message = json.dumps(payload)
         self.send_message("planet/%s/117" % self.planet_name, message)
 
-
     # DO NOT EDIT THE METHOD SIGNATURE
     #
     # In order to keep the logging working you must provide a topic string and
@@ -445,7 +436,6 @@ class Communication:
 
         # YOUR CODE FOLLOWS
         self.client.publish(topic, payload=message, qos=1)
-
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #
