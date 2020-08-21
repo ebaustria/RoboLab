@@ -4,6 +4,9 @@
 import math
 from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 
 @unique
@@ -54,7 +57,6 @@ class Planet:
     # new values. This process is then repeated for the opposite direction (target point and end direction as keys),
     # with the additional condition that the target point is not None (prevents None from being added to the planet
     # dictionary as a key).
-
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
         """
@@ -68,7 +70,6 @@ class Planet:
         :return: void
         """
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
         path_to_add = Path(start[0], target[0], weight, start[1], target[1])
 
         if path_to_add.start not in self.planet_dict:
@@ -108,13 +109,7 @@ class Planet:
 
         return self.planet_dict
 
-    def add_blocked_path(self, path: Path):
-        entry = (path.start, path.start_dir)
-        self.blocked_paths.append(entry)
-
-    def get_blocked_paths(self) -> List[Tuple[Tuple[int, int], Direction]]:
-        return self.blocked_paths
-
+    # Implementation of Dijkstra's algorithm.
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int],
                                                                                                        Direction]]]:
         """
@@ -134,15 +129,11 @@ class Planet:
         shortest_path = []
 
         if start == target:
-            print("Target reached.\n")
+            print("Target reached.")
             return shortest_path
 
         if target not in self.planet_dict.keys():
-            print("Target is unexplored.\n")
-            return None
-
-        if not self.check_for_path(current_node, target, []):
-            print("Target is unreachable.\n")
+            print("Target is unexplored.")
             return None
 
         for node in self.planet_dict.keys():
@@ -150,6 +141,10 @@ class Planet:
                 unvisited[node] = 0
             else:
                 unvisited[node] = math.inf
+
+        if not self.path_exists(start, target):
+            print("Target is unreachable.")
+            return None
 
         while target in unvisited:
             current_neighbors = self.planet_dict[current_node].items()
@@ -169,7 +164,11 @@ class Planet:
                 if distance == min(unvisited.values()):
                     current_node = node
 
-        shortest_path.append(precursor_compass_dict[target])
+        if target in precursor_compass_dict.keys():
+            shortest_path.append(precursor_compass_dict[target])
+        else:
+            print("Target is unreachable.")
+            return None
 
         for (coord, direc) in shortest_path:
             if coord != start:
@@ -177,22 +176,30 @@ class Planet:
 
         shortest_path.reverse()
 
-        #if shortest_path[0] is None:
-        #    print("Target is not reachable\n")
-        #    return None
-
-        print("Target is reachable.\n")
+        print("Target is reachable.")
         return shortest_path
 
-    def check_for_path(self, current: Tuple[int, int], target: Tuple[int, int], checked: List[Tuple[int, int]]) -> bool:
-        current_neighbors = self.planet_dict[current].items()
+    # Helper function for determining whether a given target node can be reached from a given start node. Intended to
+    # prevent shortest_path from attempting to create a shortest path to a node that is located in the planet dictionary
+    # but cannot be reached.
+    def path_exists(self, start: Tuple[int, int], target: Tuple[int, int]) -> bool:
+        to_check = []
+        checked = []
 
-        if current == target:
-            return True
+        to_check.append(start)
 
-        for (start_dir, path) in current_neighbors:
-            if current != path[0] and path[0] not in checked:
-                checked.append(current)
-                current = path[0]
-                return self.check_for_path(current, target, checked)
+        while len(to_check) != 0:
+            removed = to_check[0]
+            checked.append(removed)
+            to_check.remove(removed)
+            neighbors = self.planet_dict[removed].items()
 
+            for (start_dir, path) in neighbors:
+                if path[0] == target and path[2] == -1:
+                    return False
+                if path[0] == target:
+                    return True
+                if path[0] not in checked and path[2] != -1:
+                    to_check.append(path[0])
+
+        return False
