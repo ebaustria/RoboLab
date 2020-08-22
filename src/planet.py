@@ -132,44 +132,63 @@ class Planet:
             print("Target reached.")
             return shortest_path
 
+        # If the target node is not in the planet dictionary, then it cannot be found/reached. Return None.
         if target not in self.planet_dict.keys():
             print("Target is unexplored.")
             return None
 
+        # All nodes are marked unvisited. The start node is given the tentative distance of 0, and the other nodes are
+        # given the tentative distance of infinity.
         for node in self.planet_dict.keys():
             if node == start:
                 unvisited[node] = 0
             else:
                 unvisited[node] = math.inf
 
+        # If no path exists between the start node and the target, return None.
         if not self.path_exists(start, target):
             print("Target is unreachable.")
             return None
 
+        # As long as the target has not been visited, iterate over the neighbors of the current node. If the neighbor is
+        # unvisited and the weight of the edge that connects it to the current node is not -1 (i.e. the path is not
+        # blocked), add the current_node's tentative distance to the weight of the edge between the current node and the
+        # neighbor. If this number is smaller than the tentative distance of the neighbor, then it becomes the
+        # neighbor's new tentative distance, and the current node and the start direction that leads to the neighbor are
+        # marked as the neighbor's tentative precursor.
         while target in unvisited:
             current_neighbors = self.planet_dict[current_node].items()
             for (start_dir, path) in current_neighbors:
                 if path[0] in unvisited.keys() and path[2] != -1:
                     neighbor = path[0]
                     neighbor_weight = path[2]
-                    distance = unvisited[neighbor]
-                    if unvisited[current_node] + neighbor_weight < distance:
-                        distance = unvisited[current_node] + neighbor_weight
-                        unvisited[neighbor] = distance
+                    tentative_dist = unvisited[neighbor]
+                    if unvisited[current_node] + neighbor_weight < tentative_dist:
+                        tentative_dist = unvisited[current_node] + neighbor_weight
+                        unvisited[neighbor] = tentative_dist
                         precursor_compass_dict[neighbor] = (current_node, start_dir)
 
+            # Mark the current node as visited after checking its neighbors.
             unvisited.pop(current_node)
 
+            # Find the unvisited node with the lowest tentative distance and set it to the current node.
             for (node, distance) in unvisited.items():
                 if distance == min(unvisited.values()):
                     current_node = node
 
+        # Exit the while loop when the target has been marked as visited and append its precursor to the empty shortest
+        # path. If the target is not in the dictionary of precursors, return None instead (This should theoretically
+        # only happen if the target is only connected to blocked edges. I don't think this is actually possible because
+        # of path_exists, but better safe than sorry.
         if target in precursor_compass_dict.keys():
             shortest_path.append(precursor_compass_dict[target])
         else:
             print("Target is unreachable.")
             return None
 
+        # Iterate over the shortest path until the start node is reached. On every iteration, add the respective node's
+        # precursor to the shortest path. When the iteration is finished, reverse the shortest path and return it as the
+        # result.
         for (coord, direc) in shortest_path:
             if coord != start:
                 shortest_path.append(precursor_compass_dict[coord])
@@ -196,8 +215,8 @@ class Planet:
 
             for (start_dir, path) in neighbors:
                 if path[0] == target and path[2] == -1:
-                    return False
-                if path[0] == target:
+                    pass
+                elif path[0] == target:
                     return True
                 if path[0] not in checked and path[2] != -1:
                     to_check.append(path[0])
