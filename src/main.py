@@ -38,18 +38,13 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
-
-
-    #my changes start
-
+    # my changes start
 
     myMotor = Motors()
     myUltrasonic = Ultrasonic()
     myColorSensor = ColorSensor()
     print("Press Button to start")
     myColorSensor.button_pressed()
-
-
 
     rm = ev3.LargeMotor("outB")
     lm = ev3.LargeMotor("outC")
@@ -80,12 +75,15 @@ def run():
     length = myOdometry.get_path_length(dl, dr, alpha)
     print("Länge: " + str(length))'''
 
+    # startkoordinaten
+    x_coordinate = 0
+    y_coordinate = 0
+    cardinal_points = ["NORTH", "EAST", "SOUTH", "WEST"]
+    direction = "NORTH"  # start direction
 
-
-
-    counter = 0 #better solution? -> first drive away from node than scan again
+    counter = 0  # better solution? -> first drive away from node than scan again
     while True:
-        while myUltrasonic.get_distance() > 20:
+        while myUltrasonic.get_distance() > 10:
             if myColorSensor.get_node() == "blue" and counter == 0:
                 # ev3.Sound.speak("Blue")
                 counter += 1
@@ -98,7 +96,7 @@ def run():
                 dif_x = 0
                 dif_y = 0
 
-                print("Listenlänge: " + str(len(myOdometry.get_tupel_list())))
+                # print("Listenlänge: " + str(len(myOdometry.get_tupel_list())))
                 for tupel in myOdometry.get_tupel_list():
                     ticks_l = tupel[0]
                     ticks_r = tupel[1]
@@ -107,11 +105,33 @@ def run():
                     dif_y += myOdometry.get_dif_y(gamma, ticks_l, ticks_r)
                     gamma = myOdometry.get_gamma_new(gamma, ticks_l, ticks_r)
                     length += myOdometry.get_path_length(ticks_l, ticks_r)
-                print("New gamma: " + str(gamma*360/(2*math.pi)))
+                gamma_in_grad = gamma * 360 / (2 * math.pi)
+                print("New gamma: " + str(gamma_in_grad))
                 print("Path length: " + str(length))
                 print("Moved in x-direction: " + str(dif_x))
                 print("Moved in y-direction: " + str(dif_y))
                 myOdometry.reset_list()
+
+                x_coordinate += round(dif_x / 50)
+                y_coordinate += round(dif_y / 50)
+                if abs(gamma_in_grad) > 315 or abs(gamma_in_grad) < 45:
+                    pass
+                elif 45 < abs(gamma_in_grad) < 135:
+                    if gamma_in_grad < 0:
+                        direction = cardinal_points[cardinal_points.index(direction) + 1]  # or -1?
+                    else:
+                        direction = cardinal_points[cardinal_points.index(direction) - 1]  # or +1?
+                elif 135 < abs(gamma_in_grad) < 225:
+                    direction = cardinal_points[cardinal_points.index(direction) + 2]
+                elif 225 < abs(gamma_in_grad) < 315:
+                    if gamma_in_grad < 0:
+                        direction = cardinal_points[cardinal_points.index(direction) - 1]  # or +1?
+                    else:
+                        direction = cardinal_points[cardinal_points.index(direction) + 1]  # or -1?
+
+                print("-------")
+                print("X-Koordinate: " + str(x_coordinate) + " Y-Koordinate: " + str(y_coordinate))
+                print("Blickrichtung: " + direction)
 
                 angles = myColorSensor.get_neighbour_nodes()
 
@@ -119,7 +139,7 @@ def run():
                     print("Winkel: " + str(angle))
 
                 if angles[3] is not 10:
-                    myMotor.turn_angle(100, angles[3]-10, 6)
+                    myMotor.turn_angle(100, angles[3] - 10, 6)
                 elif angles[0] is not 10:
                     myMotor.turn_angle(100, angles[0] - 10, 6)
                 elif angles[1] is not 10:
@@ -134,7 +154,7 @@ def run():
                 time.sleep(4)  # necessary?'''
 
             elif myColorSensor.get_node() == "red" and counter == 0:
-                #ev3.Sound.speak("Red")
+                # ev3.Sound.speak("Red")
                 counter += 1
                 myMotor.stop()
                 myMotor.drive_forward(50, 4)
@@ -145,7 +165,6 @@ def run():
                 dif_x = 0
                 dif_y = 0
 
-                #print("Listenlänge: " + str(len(myOdometry.get_tupel_list())))
                 for tupel in myOdometry.get_tupel_list():
                     ticks_l = tupel[0]
                     ticks_r = tupel[1]
@@ -154,28 +173,47 @@ def run():
                     dif_y += myOdometry.get_dif_y(gamma, ticks_l, ticks_r)
                     gamma = myOdometry.get_gamma_new(gamma, ticks_l, ticks_r)
                     length += myOdometry.get_path_length(ticks_l, ticks_r)
-
-                print("New gamma: " + str(gamma * 360 / (2 * math.pi)))
+                gamma_in_grad = gamma * 360 / (2 * math.pi)
+                print("New gamma: " + str(gamma_in_grad))
                 print("Path length: " + str(length))
                 print("Moved in x-direction: " + str(dif_x))
                 print("Moved in y-direction: " + str(dif_y))
                 myOdometry.reset_list()
 
+                x_coordinate += round(dif_x / 50)
+                y_coordinate += round(dif_y / 50)
+                if abs(gamma_in_grad) > 315 or abs(gamma_in_grad) < 45:
+                    pass
+                elif 45 < abs(gamma_in_grad) < 135:
+                    if gamma_in_grad < 0:
+                        direction = cardinal_points[cardinal_points.index(direction) + 1]  # or -1?
+                    else:
+                        direction = cardinal_points[cardinal_points.index(direction) - 1]  # or +1?
+                elif 135 < abs(gamma_in_grad) < 225:
+                    direction = cardinal_points[cardinal_points.index(direction) + 2]
+                elif 225 < abs(gamma_in_grad) < 315:
+                    if gamma_in_grad < 0:
+                        direction = cardinal_points[cardinal_points.index(direction) - 1]  # or +1?
+                    else:
+                        direction = cardinal_points[cardinal_points.index(direction) + 1]  # or -1?
+
+                print("-------")
+                print("X-Koordinate: " + str(x_coordinate) + " Y-Koordinate: " + str(y_coordinate))
+                print("Blickrichtung: " + direction)
 
                 angles = myColorSensor.get_neighbour_nodes()
 
                 for angle in angles:
                     print("Winkel: " + str(angle))
 
-                #myMotor.turn_to_node(myColorSensor)#turn to one of the detected nodes
+                # myMotor.turn_to_node(myColorSensor)#turn to one of the detected nodes
 
                 if angles[3] is not 10:
-                    myMotor.turn_angle(100, angles[3]-10, 6)
+                    myMotor.turn_angle(100, angles[3] - 10, 6)
                 elif angles[0] is not 10:
                     myMotor.turn_angle(100, angles[0] - 10, 6)
                 elif angles[1] is not 10:
                     myMotor.turn_angle(100, angles[1] - 10, 6)
-
 
                 '''for angle in angles:
                     if angle != 10:
@@ -188,13 +226,11 @@ def run():
             else:
                 myMotor.follow_line(0.5, myColorSensor, myOdometry)
                 counter = 0
-        myMotor.turn_angle(100,170,4)#turn until next path
+        myMotor.turn_angle(100, 170, 4)  # turn until next path
 
+    # my changes end
 
-    #my changes end
-
-
-    #print("Hello World!")
+    # print("Hello World!")
 
 
 # DO NOT EDIT
