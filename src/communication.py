@@ -275,8 +275,7 @@ class Communication:
             }
         }
 
-        message = json.dumps(payload)
-        self.send_message("explorer/117", message)
+        self.send_message("explorer/117", payload)
 
     def send_ready(self):
         """
@@ -294,8 +293,7 @@ class Communication:
             "type": "ready"
         }
 
-        message = json.dumps(payload)
-        self.send_message("explorer/117", message)
+        self.send_message("explorer/117", payload)
 
     def send_path(self, path: Path, blocked: bool):
         """
@@ -335,8 +333,7 @@ class Communication:
             }
         }
 
-        message = json.dumps(payload)
-        self.send_message("planet/%s/117" % self.planet_name, message)
+        self.send_message("planet/%s/117" % self.planet_name, payload)
         
     def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
         """
@@ -365,8 +362,7 @@ class Communication:
             }
         }
 
-        message = json.dumps(payload)
-        self.send_message("planet/%s/117" % self.planet_name, message)
+        self.send_message("planet/%s/117" % self.planet_name, payload)
         
     def send_target_reached(self, msg: str):
         """
@@ -391,8 +387,7 @@ class Communication:
             }
         }
 
-        message = json.dumps(payload)
-        self.send_message("planet/%s/117" % self.planet_name, message)
+        self.send_message("planet/%s/117" % self.planet_name, payload)
         
     def send_exploration_completed(self, msg: str):
         """
@@ -417,8 +412,7 @@ class Communication:
             }
         }
 
-        message = json.dumps(payload)
-        self.send_message("planet/%s/117" % self.planet_name, message)
+        self.send_message("planet/%s/117" % self.planet_name, payload)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -435,7 +429,7 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS
-        self.client.publish(topic, payload=message, qos=1)
+        self.client.publish(topic, payload=json.dumps(message), qos=1)
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #

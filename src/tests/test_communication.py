@@ -206,15 +206,13 @@ class TestRoboLabCommunication(unittest.TestCase):
         self.communication.client.on_message = test
 
         # Send correct data
-        message = json.dumps(self.ready_cor)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.ready_cor)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.ready_more)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.ready_more)
 
         # Wait until everything is received
         while data["finished"] < data["max"]:
@@ -251,22 +249,19 @@ class TestRoboLabCommunication(unittest.TestCase):
         self.communication.client.on_message = test
 
         # Send correct data
-        message = json.dumps(self.path_cor)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.path_cor)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.path_more)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.path_more)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.path_miss)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.path_miss)
 
         # Wait until everything is received
         while data["finished"] < data["max"]:
@@ -301,15 +296,13 @@ class TestRoboLabCommunication(unittest.TestCase):
         self.communication.client.on_message = test
 
         # Send invalid data
-        message = json.dumps(self.path_status)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.path_status)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.path_number)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.path_number)
 
         # Wait until everything is received
         while data["finished"] < data["max"]:
@@ -348,29 +341,25 @@ class TestRoboLabCommunication(unittest.TestCase):
         self.communication.client.on_message = test
 
         # Send correct data
-        message = json.dumps(self.select_cor)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.select_cor)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.select_more)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.select_more)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.select_miss)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.select_miss)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.select_number)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.select_number)
 
         # Wait until everything is received
         while data["finished"] < data["max"]:
@@ -417,54 +406,46 @@ class TestRoboLabCommunication(unittest.TestCase):
         self.communication.client.on_message = test
 
         # Send correct data
-        message = json.dumps(self.reached_cor)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.reached_cor)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.reached_more)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.reached_more)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.reached_miss)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.reached_miss)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.reached_number)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.reached_number)
 
         # Send correct data
-        message = json.dumps(self.complete_cor)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.complete_cor)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.complete_more)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.complete_more)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.complete_miss)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.complete_miss)
 
         # Sleep before sending next check
         time.sleep(0.3)
 
         # Send invalid data
-        message = json.dumps(self.complete_number)
-        self.communication.send_message("comtest/117", message)
+        self.communication.send_message("comtest/117", self.complete_number)
 
         # Wait until everything is received
         while data["finished"] < data["max"]:
