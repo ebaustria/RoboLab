@@ -57,26 +57,27 @@ class ColorSensor:
 
         angle = 0
         while True:
-            if brightness > 200:
-                brightness = self.get_brightness()
-                angle += 9
-                myMotor.turn_angle(100, angle, 0.2)
-            else:
+
+            if brightness < 200:
                 if angle > 315 or angle < 45:
-                    if angle not in angles:
-                        angles[0] = angle
+                    if 0 not in angles:
+                        angles[0] = 0
                 elif angle > 45 and angle < 135:
-                    if angle not in angles:
-                        angles[1] = angle
+                    if 90 not in angles:
+                        angles[1] = 90
                 elif angle > 135 and angle < 225:
-                    if angle not in angles:
-                        angles[2] = angle
+                    if 180 not in angles:
+                        angles[2] = 180
                 elif angle > 225 and angle < 315:
-                    if angle not in angles:
-                        angles[3] = angle
-                print("Winkel: " + str(angle))
+                    if 270 not in angles:
+                        angles[3] = 270
+                #print("Winkel: " + str(angle))
             if angle >= 360:
                 break
+
+            brightness = self.get_brightness()
+            angle += 5
+            myMotor.turn_angle(100, 5, 0.2)
         return angles
         '''
         for ticks in range(0, 40): #40 ticks (movements)

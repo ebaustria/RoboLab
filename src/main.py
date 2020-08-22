@@ -54,7 +54,8 @@ def run():
     rm = ev3.LargeMotor("outB")
     lm = ev3.LargeMotor("outC")
     myOdometry = Odometry(lm, rm)
-    myOdometry.reset_position()
+
+    '''myOdometry.reset_position()
     pos_l, pos_r = myOdometry.get_position()
     print("Position 1 rechts: " + str(pos_r))
     print("Position 1 links: " + str(pos_l))
@@ -66,6 +67,8 @@ def run():
         a = tupel[0]
         b = tupel[1]
         print("A: " + str(a) + "    B: " + str(b))
+    '''
+
     '''pos_l, pos_r = myOdometry.get_position()
     print("Position 1 rechts: " + str(pos_r))
     print("Position 1 links: " + str(pos_l))
@@ -78,7 +81,7 @@ def run():
     print("Länge: " + str(length))'''
 
 
-    '''
+
 
     counter = 0 #better solution? -> first drive away from node than scan again
     while True:
@@ -87,49 +90,107 @@ def run():
                 # ev3.Sound.speak("Blue")
                 counter += 1
                 myMotor.stop()
-                myMotor.drive_forward(50, 3)
+                myMotor.drive_forward(50, 4)
                 myMotor.stop()
+
+                gamma = 0
+                length = 0
+                dif_x = 0
+                dif_y = 0
+
+                print("Listenlänge: " + str(len(myOdometry.get_tupel_list())))
+                for tupel in myOdometry.get_tupel_list():
+                    ticks_l = tupel[0]
+                    ticks_r = tupel[1]
+
+                    dif_x += myOdometry.get_dif_x(gamma, ticks_l, ticks_r)
+                    dif_y += myOdometry.get_dif_y(gamma, ticks_l, ticks_r)
+                    gamma = myOdometry.get_gamma_new(gamma, ticks_l, ticks_r)
+                    length += myOdometry.get_path_length(ticks_l, ticks_r)
+                print("New gamma: " + str(gamma*360/(2*math.pi)))
+                print("Path length: " + str(length))
+                print("Moved in x-direction: " + str(dif_x))
+                print("Moved in y-direction: " + str(dif_y))
+                myOdometry.reset_list()
 
                 angles = myColorSensor.get_neighbour_nodes()
 
-                i = 0
                 for angle in angles:
+                    print("Winkel: " + str(angle))
 
-                    i += 1
-                    print(str(i) + ". Knoten am Winkel: " + str(angle))
-                    if angle != 10: #only test -> decision for angle later
+                if angles[3] is not 10:
+                    myMotor.turn_angle(100, angles[3]-10, 6)
+                elif angles[0] is not 10:
+                    myMotor.turn_angle(100, angles[0] - 10, 6)
+                elif angles[1] is not 10:
+                    myMotor.turn_angle(100, angles[1] - 10, 6)
+
+                '''for angle in angles:
+                    if angle != 10:
                         print("Winkel ungleich 10")
-                        myMotor.turn_angle(100, angle, 4)
-                        time.sleep(1) #necessary?
+                        myMotor.turn_angle(100, angle - 20, 4)  # exchange: turn until needed node found
+                        time.sleep(1)  # necessary?
                         break
-                time.sleep(2) #necessary?
+                time.sleep(4)  # necessary?'''
 
             elif myColorSensor.get_node() == "red" and counter == 0:
                 #ev3.Sound.speak("Red")
                 counter += 1
                 myMotor.stop()
-                myMotor.drive_forward(50, 3)
+                myMotor.drive_forward(50, 4)
                 myMotor.stop()
+
+                gamma = 0
+                length = 0
+                dif_x = 0
+                dif_y = 0
+
+                #print("Listenlänge: " + str(len(myOdometry.get_tupel_list())))
+                for tupel in myOdometry.get_tupel_list():
+                    ticks_l = tupel[0]
+                    ticks_r = tupel[1]
+
+                    dif_x += myOdometry.get_dif_x(gamma, ticks_l, ticks_r)
+                    dif_y += myOdometry.get_dif_y(gamma, ticks_l, ticks_r)
+                    gamma = myOdometry.get_gamma_new(gamma, ticks_l, ticks_r)
+                    length += myOdometry.get_path_length(ticks_l, ticks_r)
+
+                print("New gamma: " + str(gamma * 360 / (2 * math.pi)))
+                print("Path length: " + str(length))
+                print("Moved in x-direction: " + str(dif_x))
+                print("Moved in y-direction: " + str(dif_y))
+                myOdometry.reset_list()
+
 
                 angles = myColorSensor.get_neighbour_nodes()
 
-                i = 0
                 for angle in angles:
-                    i += 1
-                    print(str(i) + ". Knoten am Winkel: " + str(angle))
+                    print("Winkel: " + str(angle))
+
+                #myMotor.turn_to_node(myColorSensor)#turn to one of the detected nodes
+
+                if angles[3] is not 10:
+                    myMotor.turn_angle(100, angles[3]-10, 6)
+                elif angles[0] is not 10:
+                    myMotor.turn_angle(100, angles[0] - 10, 6)
+                elif angles[1] is not 10:
+                    myMotor.turn_angle(100, angles[1] - 10, 6)
+
+
+                '''for angle in angles:
                     if angle != 10:
                         print("Winkel ungleich 10")
-                        myMotor.turn_angle(100,angle,4)
+                        myMotor.turn_angle(100,angle-20,4)#exchange: turn until needed node found
                         time.sleep(1) #necessary?
                         break
-                time.sleep(2)#necessary?
+                time.sleep(4)#necessary?'''
 
             else:
-                myMotor.follow_line(0.5, myColorSensor)
+                myMotor.follow_line(0.5, myColorSensor, myOdometry)
                 counter = 0
-        myMotor.turn_angle(100,170,4)
+        myMotor.turn_angle(100,170,4)#turn until next path
 
-    '''
+
     #my changes end
 
 
