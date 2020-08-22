@@ -7,6 +7,7 @@ import ssl
 from typing import Tuple
 
 from planet import Path, Direction
+from robot import Robot
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -20,7 +21,7 @@ class Communication:
     thereby solve the task according to the specifications
     """
 
-    def __init__(self, mqtt_client, logger):
+    def __init__(self, mqtt_client, logger, robot: Robot):
         """
         Initializes communication module, connect to server, subscribe, etc.
         :param mqtt_client: paho.mqtt.client.Client
@@ -31,8 +32,11 @@ class Communication:
         self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
-
         self.planet_name = None
+
+        self.robot = robot
+        self.planet = robot.planet
+        self.start = None
 
         self.client.username_pw_set('117', password='0QOfuyjhr0')  # Your group credentials
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
@@ -104,10 +108,10 @@ class Communication:
             start_y = payload["payload"]["startY"]
             start_dir = payload["payload"]["startOrientation"]
 
-            start = ((start_x, start_y), start_dir)
+            self.start = ((start_x, start_y), start_dir)
 
-            # TODO use start and name somewhere 
-
+            # TODO use start and name somewhere
+            self.robot.current_location = self.start[0]
             # Subscribe to planet channel
             self.client.subscribe('planet/%s/117' % self.planet_name, qos=1)
         # path-Message
@@ -145,10 +149,12 @@ class Communication:
             end = ((end_x, end_y), end_dir)
 
             # TODO add Path to planet and check if it's blocked
-            if blocked:
-                pass
-            else:
-                pass
+
+            if self.path_blocked(blocked):
+                weight = -1
+
+            self.planet.add_path(start, end, weight)
+            self.robot.current_location = end[0]
 
             pass
         # pathSelect-Message
@@ -203,10 +209,11 @@ class Communication:
             end = ((end_x, end_y), end_dir)
 
             # TODO add Path to planet and check if it's blocked
-            if blocked:
-                pass
-            else:
-                pass
+
+            if self.path_blocked(blocked):
+                weight = -1
+
+            self.planet.add_path(start, end, weight)
 
             pass
         # target-Message
@@ -229,7 +236,8 @@ class Communication:
             target = (target_x, target_y)
             
             # TODO set global target and check if it's reachable
-
+            self.planet.target = target
+            # do we want to call shortest_path here or somewhere else? I think somewhere else?
             pass
         # done-Message
         elif payload_type == "done":
@@ -248,10 +256,17 @@ class Communication:
             self.logger.debug(msg)
 
             # TODO exit programm
-
+            self.robot.running = False
             pass
         else:
             raise Exception("Invalid Messagetype")
+
+    def path_blocked(self, blocked: str) -> bool:
+
+        if blocked == "blocked":
+            return True
+        else:
+            return False
 
     def send_planet_name(self, name: str):
         """
