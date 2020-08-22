@@ -3,11 +3,13 @@ import time
 import math
 from sensors import ColorSensor
 from odometry import Odometry
+from robot import Robot
 
 class Motors:
-    def __init__(self):
+    def __init__(self, robot: Robot):
         self.rm = ev3.LargeMotor("outB")
         self.lm = ev3.LargeMotor("outC")
+        self.robot = robot
 
     #in progress (all commands necessary? better command than "run-forever"? sleep necessary?)
     def drive_forward(self, speed, duration):

@@ -44,6 +44,7 @@ class Planet:
     it according to the specifications
     """
 
+    # TODO does Planet class need name attribute?
     def __init__(self):
         """ Initializes the data structure """
         self.target = None
