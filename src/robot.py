@@ -45,12 +45,20 @@ class Robot:
                 # This should probably happen at the end of the robot's Aufenthalt at a node.
                 if self.planet.target is not None:
                     shortest = self.planet.shortest_path(self.current_location, self.planet.target)
-                    if shortest is not None:
+
+                    if not shortest:
+                        # TODO send_target_reached
+                        self.planet.target = None
+                    elif shortest is not None:
                         self.explore_mode = False
                         # TODO do something with the shortest path
             else:
                 shortest = self.planet.shortest_path(self.current_location, self.planet.target)
+
                 if shortest is None:
                     self.explore_mode = True
+                elif not shortest:
+                    # TODO send_target_reached
+                    self.planet.target = None
                 else:
                     # TODO do something with the shortest path
