@@ -9,3 +9,7 @@ class Robot:
         self.planet = planet
         self.communication = communication
         self.odometry = odometry
+        self.running = True
+
+    def run(self):
+        # while self.running:
