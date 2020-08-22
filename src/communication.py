@@ -62,10 +62,14 @@ class Communication:
 
         # YOUR CODE FOLLOWS
 
+        # Ignore messages from client
+        if payload["from"] == "client":
+            return
+
         # Get type of payload
         payload_type = payload["type"]
 
-        # testplanet-Message
+        # debug/error messages e.g. testplanet-Message
         if payload_type in ["notice", "error", "adjust"]:
             """
             Contains some helpful information
