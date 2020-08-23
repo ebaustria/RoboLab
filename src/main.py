@@ -80,82 +80,49 @@ def run():
     y_coordinate = 0
     cardinal_points = ["NORTH", "EAST", "SOUTH", "WEST"]
     direction = "NORTH"  # start direction
+    gamma_old = 0 #only for north as start direction
 
     counter = 0  # better solution? -> first drive away from node than scan again
+    bottle_detected = 0 #better solution? -> x- and y-Koordinates do not change when driving back to node
     while True:
         while myUltrasonic.get_distance() > 10:
             if myColorSensor.get_node() == "blue" and counter == 0:
                 # ev3.Sound.speak("Blue")
+
+
                 counter += 1
-                myMotor.stop()
-                myMotor.drive_forward(50, 4)
-                myMotor.stop()
 
-                gamma = 0
-                length = 0
-                dif_x = 0
-                dif_y = 0
+                gamma_old, direction, x_coordinate, y_coordinate = \
+                    myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected, direction)
 
-                # print("Listenlänge: " + str(len(myOdometry.get_tupel_list())))
-                for tupel in myOdometry.get_tupel_list():
-                    ticks_l = tupel[0]
-                    ticks_r = tupel[1]
 
-                    dif_x += myOdometry.get_dif_x(gamma, ticks_l, ticks_r)
-                    dif_y += myOdometry.get_dif_y(gamma, ticks_l, ticks_r)
-                    gamma = myOdometry.get_gamma_new(gamma, ticks_l, ticks_r)
-                    length += myOdometry.get_path_length(ticks_l, ticks_r)
-                gamma_in_grad = gamma * 360 / (2 * math.pi)
-                print("New gamma: " + str(gamma_in_grad))
-                print("Path length: " + str(length))
-                print("Moved in x-direction: " + str(dif_x))
-                print("Moved in y-direction: " + str(dif_y))
-                myOdometry.reset_list()
 
-                x_coordinate += round(dif_x / 50)
-                y_coordinate += round(dif_y / 50)
-                if abs(gamma_in_grad) > 315 or abs(gamma_in_grad) < 45:
-                    pass
-                elif 45 < abs(gamma_in_grad) < 135:
-                    if gamma_in_grad < 0:
-                        direction = cardinal_points[cardinal_points.index(direction) + 1]  # or -1?
-                    else:
-                        direction = cardinal_points[cardinal_points.index(direction) - 1]  # or +1?
-                elif 135 < abs(gamma_in_grad) < 225:
-                    direction = cardinal_points[cardinal_points.index(direction) + 2]
-                elif 225 < abs(gamma_in_grad) < 315:
-                    if gamma_in_grad < 0:
-                        direction = cardinal_points[cardinal_points.index(direction) - 1]  # or +1?
-                    else:
-                        direction = cardinal_points[cardinal_points.index(direction) + 1]  # or -1?
+                bottle_detected = 0
 
-                print("-------")
-                print("X-Koordinate: " + str(x_coordinate) + " Y-Koordinate: " + str(y_coordinate))
-                print("Blickrichtung: " + direction)
 
-                angles = myColorSensor.get_neighbour_nodes()
 
-                for angle in angles:
-                    print("Winkel: " + str(angle))
 
-                if angles[3] is not 10:
+
+
+
+                '''if angles[3] is not 10:
                     myMotor.turn_angle(100, angles[3] - 10, 6)
                 elif angles[0] is not 10:
                     myMotor.turn_angle(100, angles[0] - 10, 6)
                 elif angles[1] is not 10:
-                    myMotor.turn_angle(100, angles[1] - 10, 6)
+                    myMotor.turn_angle(100, angles[1] - 10, 6)'''
 
-                '''for angle in angles:
-                    if angle != 10:
-                        print("Winkel ungleich 10")
-                        myMotor.turn_angle(100, angle - 20, 4)  # exchange: turn until needed node found
-                        time.sleep(1)  # necessary?
-                        break
-                time.sleep(4)  # necessary?'''
+
 
             elif myColorSensor.get_node() == "red" and counter == 0:
                 # ev3.Sound.speak("Red")
+
                 counter += 1
+                gamma_old, direction, x_coordinate, y_coordinate = \
+                    myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected,
+                                          direction)
+                bottle_detected = 0
+                '''counter += 1
                 myMotor.stop()
                 myMotor.drive_forward(50, 4)
                 myMotor.stop()
@@ -213,20 +180,16 @@ def run():
                 elif angles[0] is not 10:
                     myMotor.turn_angle(100, angles[0] - 10, 6)
                 elif angles[1] is not 10:
-                    myMotor.turn_angle(100, angles[1] - 10, 6)
+                    myMotor.turn_angle(100, angles[1] - 10, 6)'''
 
-                '''for angle in angles:
-                    if angle != 10:
-                        print("Winkel ungleich 10")
-                        myMotor.turn_angle(100,angle-20,4)#exchange: turn until needed node found
-                        time.sleep(1) #necessary?
-                        break
-                time.sleep(4)#necessary?'''
+
 
             else:
                 myMotor.follow_line(0.5, myColorSensor, myOdometry)
                 counter = 0
-        myMotor.turn_angle(100, 170, 4)  # turn until next path
+        myColorSensor.turn_to_angle(180, myMotor)  # turn until next path
+        gamma_old += math.pi
+        bottle_detected = 1
 
     # my changes end
 

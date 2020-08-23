@@ -174,5 +174,9 @@ class Motors:
         #rm.stop()
         #lm.stop()
 
+    def drive_in_center_of_node(self, speed, duration):
+        self.stop()
+        self.drive_forward(speed, duration)
+        self.stop()
 
 

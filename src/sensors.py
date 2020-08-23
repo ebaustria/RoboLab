@@ -131,6 +131,98 @@ class ColorSensor:
         while not btn.any():
             pass
 
+    def turn_to_angle(self, angle, myMotor):
+        myMotor.turn_angle(100, angle-45, 5)
+        brightness = self.get_brightness()
+
+        while brightness > 200:
+            myMotor.turn_angle(100, 5, 0.2)
+            brightness = self.get_brightness()
+
+        myMotor.stop()
+
+
+
+    def explore(self, myMotor, myOdometry, gamma_old, x_coordinate, y_coordinate, bottle_detected, old_cardinal_point):
+        myMotor.drive_in_center_of_node(50, 3)
+        dif_x, dif_y, gamma, length = myOdometry.calculate_values(gamma_old)
+        gamma_in_grad = gamma * 360 / (2 * math.pi)
+
+        print("New gamma: " + str(gamma_in_grad))
+        print("Path length: " + str(length))
+        print("Moved in x-direction: " + str(dif_x))
+        print("Moved in y-direction: " + str(dif_y))
+
+        myOdometry.reset_list()
+
+        print("Gamma in grad: " + str(gamma_in_grad))
+        cardinal_point = myOdometry.get_cardinal_point(gamma_in_grad, old_cardinal_point)
+
+        if bottle_detected == 0:
+            x_coordinate += round(dif_x / 50)
+            y_coordinate += round(dif_y / 50)
+
+        '''if cardinal_point == "NORTH":
+            x_coordinate += round(dif_x / 50)
+            y_coordinate += round(dif_y / 50)
+        elif cardinal_point == "SOUTH":
+            x_coordinate -= round(dif_x / 50)
+            y_coordinate -= round(dif_y / 50)
+        elif cardinal_point == "WEST":
+            x_coordinate -= round(dif_x / 50)# +,- in different order?
+            y_coordinate += round(dif_y / 50)# +,- in different order?
+        elif cardinal_point == "EAST":
+            x_coordinate += round(dif_x / 50)# +,- in different order?
+            y_coordinate -= round(dif_y / 50)# +,- in different order?'''
+
+
+        print("-------")
+        print("X-Koordinate: " + str(x_coordinate) + " Y-Koordinate: " + str(y_coordinate))
+        print("Blickrichtung: " + cardinal_point)
+
+        angles = self.get_neighbour_nodes()
+
+        for angle in angles:
+            print("Winkel: " + str(angle))
+
+        if angles[0] != 10:
+            print("g für geradeaus")
+        if angles[1] != 10:
+            print("l für links")
+        if angles[2] != 10:
+            print("z für zurück")
+        if angles[3] != 10:
+            print("r für rechts")
+
+        next_direction = input()
+
+        if next_direction is "g":
+            next_angle = 0
+        if next_direction is "l":
+            next_angle = 90
+            gamma_in_grad += 90
+        if next_direction is "z":
+            next_angle = 180
+            gamma_in_grad += 180
+        if next_direction is "r":
+            next_angle = -90#270
+            gamma_in_grad -= 90#+=270
+
+        gamma = gamma_in_grad * 2 * math.pi / 360
+
+        print("Gamma in grad: " + str(gamma_in_grad))
+        cardinal_point = myOdometry.get_cardinal_point(gamma_in_grad, old_cardinal_point)
+
+        print("Blickrichtung: " + cardinal_point)
+
+        self.turn_to_angle(next_angle, myMotor)
+
+        return gamma, cardinal_point, x_coordinate, y_coordinate
+
+
+
+
+
 
 
 
