@@ -11,7 +11,7 @@ class Motors:
         self.lm = ev3.LargeMotor("outC")
         self.robot = robot
 
-    #in progress (all commands necessary? better command than "run-forever"? sleep necessary?)
+    #in progress (all commands necessary? better command than "run-forever"?)
     def drive_forward(self, speed, duration):
         self.rm.reset()
         self.lm.reset()
@@ -25,6 +25,7 @@ class Motors:
         self.rm.stop()
         self.lm.stop()
 
+    #done
     def drive_backward(self, speed, duration):
         self.drive_forward(-speed, duration)
 
@@ -76,6 +77,7 @@ class Motors:
         #lm.stop()
         '''
 
+    #in progress (PID-Controller)
     def follow_line(self, duration, myColorSensor, myOdometry): #myOdometry new
         r, g, b = myColorSensor.get_colors()
         previous_brightness = math.sqrt(r**2 + g**2 + b**2) # for D-Controller
@@ -94,11 +96,9 @@ class Motors:
             #right_speed = multiplier*(50 + 50*brightness/250)
             #left_speed = multiplier*(50 + 50*250/brightness) #break condition (for low brightness value too high
 
-
             #linear speed
             #right_speed = 150 - 100 * (1 - (brightness / 350))
             #left_speed = 150 + 100 * (1 - (brightness / 350)) 75/dif
-
 
             #another linear speed with multiplier
             #right_speed = multiplier * (150 - 100 * (1 - (brightness / 350)))
@@ -119,7 +119,6 @@ class Motors:
             right_speed = 200 + turn - multiplier
             left_speed = 200 - turn + multiplier
 
-
             self.rm.speed_sp = right_speed
             self.lm.speed_sp = left_speed
             self.rm.command = "run-forever" #other mode?
@@ -132,7 +131,7 @@ class Motors:
             #ticks_l, tick_r = myOdometry.get_position()
             myOdometry.add_point(myOdometry.get_position())
 
-
+    #done
     def stop(self):
         self.rm.reset()
         self.lm.reset()
@@ -161,18 +160,22 @@ class Motors:
 
     def turn_angle(self, speed, angle, duration):
 
-        #rm.reset()
-        #lm.reset()
-        #rm.stop_action = "brake"
-        #lm.stop_action = "brake"
-
         self.rm.position_sp = angle * 2 #2 for speed = 100 (2.2 calculated and tested?)
         self.lm.position_sp = (-1) * angle * 2 #for one rotation -> wheels 2.2 rotations
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
         self.rm.command = "run-to-rel-pos"
         self.lm.command = "run-to-rel-pos"
-        time.sleep(duration)
-        #rm.stop()
-        #lm.stop()
+        time.sleep(duration)#wait.until?
+
+    #done
+    def drive_in_center_of_node(self, speed, duration):
+        self.stop()
+        self.drive_forward(speed, duration)
+        self.stop()
+
+    #done
+    def get_motors(self):
+        return self.lm, self.rm
+
 

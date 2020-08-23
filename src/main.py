@@ -50,94 +50,49 @@ def run():
     myMotor = Motors()
     myUltrasonic = Ultrasonic()
     myColorSensor = ColorSensor()
+
     print("Press Button to start")
+
     myColorSensor.button_pressed()
-
-
-
-    rm = ev3.LargeMotor("outB")
-    lm = ev3.LargeMotor("outC")
+    lm, rm = myMotor.get_motors()
     myOdometry = Odometry(lm, rm)
-    myOdometry.reset_position()
-    pos_l, pos_r = myOdometry.get_position()
-    print("Position 1 rechts: " + str(pos_r))
-    print("Position 1 links: " + str(pos_l))
-    myMotor.follow_line(1, myColorSensor, myOdometry)
-    #myMotor.drive_forward(100,2)
-    #myMotor.turn_angle(100, 10, 5)
-    #myMotor.drive_forward(100,2) #problem because alpha in that case = 0 -> division zero
-    for tupel in myOdometry.get_tupel_list():
-        a = tupel[0]
-        b = tupel[1]
-        print("A: " + str(a) + "    B: " + str(b))
-    '''pos_l, pos_r = myOdometry.get_position()
-    print("Position 1 rechts: " + str(pos_r))
-    print("Position 1 links: " + str(pos_l))
-    dl, dr = myOdometry.get_distance(pos_l,pos_r)
-    print("Distanz rechts: " + str(dr))
-    print("Distanz links; " + str(dl))
-    alpha = myOdometry.get_angle_alpha(dl,dr)
-    print("Winkel: " + str(alpha*360/(2*math.pi)))
-    length = myOdometry.get_path_length(dl, dr, alpha)
-    print("Länge: " + str(length))'''
 
 
-    '''
+    # startkoordinaten
+    x_coordinate = 0
+    y_coordinate = 0
+    #cardinal_points = ["NORTH", "EAST", "SOUTH", "WEST"]
+    direction = "NORTH"  # start direction
+    gamma_old = 0 #for all start directions
 
-    counter = 0 #better solution? -> first drive away from node than scan again
+    counter = 0  # better solution? -> first drive away from node than scan again
+    bottle_detected = 0 #better solution? -> x- and y-Koordinates do not change when driving back to node
     while True:
-        while myUltrasonic.get_distance() > 20:
+        while myUltrasonic.get_distance() > 10:
             if myColorSensor.get_node() == "blue" and counter == 0:
                 # ev3.Sound.speak("Blue")
                 counter += 1
-                myMotor.stop()
-                myMotor.drive_forward(50, 3)
-                myMotor.stop()
-
-                angles = myColorSensor.get_neighbour_nodes()
-
-                i = 0
-                for angle in angles:
-
-                    i += 1
-                    print(str(i) + ". Knoten am Winkel: " + str(angle))
-                    if angle != 10: #only test -> decision for angle later
-                        print("Winkel ungleich 10")
-                        myMotor.turn_angle(100, angle, 4)
-                        time.sleep(1) #necessary?
-                        break
-                time.sleep(2) #necessary?
-
+                gamma_old, direction, x_coordinate, y_coordinate = \
+                    myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected, direction)
+                bottle_detected = 0
             elif myColorSensor.get_node() == "red" and counter == 0:
-                #ev3.Sound.speak("Red")
+                # ev3.Sound.speak("Red")
                 counter += 1
-                myMotor.stop()
-                myMotor.drive_forward(50, 3)
-                myMotor.stop()
-
-                angles = myColorSensor.get_neighbour_nodes()
-
-                i = 0
-                for angle in angles:
-                    i += 1
-                    print(str(i) + ". Knoten am Winkel: " + str(angle))
-                    if angle != 10:
-                        print("Winkel ungleich 10")
-                        myMotor.turn_angle(100,angle,4)
-                        time.sleep(1) #necessary?
-                        break
-                time.sleep(2)#necessary?
-
+                gamma_old, direction, x_coordinate, y_coordinate = \
+                    myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected,
+                                          direction)
+                bottle_detected = 0
             else:
-                myMotor.follow_line(0.5, myColorSensor)
+                myMotor.follow_line(0.5, myColorSensor, myOdometry)
                 counter = 0
-        myMotor.turn_angle(100,170,4)
+        myColorSensor.turn_to_angle(180, myMotor)  # turn until next path
+        gamma_old += math.pi
+        gamma_in_grad = gamma_old*360/(2*math.pi)
+        direction = myOdometry.get_cardinal_point(gamma_in_grad , direction)
+        bottle_detected = 1
+    # my changes end
 
-    '''
-    #my changes end
-
-
-    #print("Hello World!")
+    # print("Hello World!")
 
 
 # DO NOT EDIT
