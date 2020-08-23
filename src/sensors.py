@@ -159,8 +159,18 @@ class ColorSensor:
         cardinal_point = myOdometry.get_cardinal_point(gamma_in_grad, old_cardinal_point)
 
         if bottle_detected == 0:
-            x_coordinate += round(dif_x / 50)
-            y_coordinate += round(dif_y / 50)
+            if old_cardinal_point == "NORTH":
+                x_coordinate += round(dif_x / 50)#check
+                y_coordinate += round(dif_y / 50)#check
+            elif old_cardinal_point == "SOUTH":
+                x_coordinate -= round(dif_x / 50)#check
+                y_coordinate -= round(dif_y / 50)#check
+            elif old_cardinal_point == "WEST":
+                x_coordinate -= round(dif_y / 50)#check
+                y_coordinate += round(dif_x / 50)#check
+            elif old_cardinal_point == "EAST":
+                x_coordinate += round(dif_y / 50)#check
+                y_coordinate -= round(dif_x / 50)#check
 
         '''if cardinal_point == "NORTH":
             x_coordinate += round(dif_x / 50)

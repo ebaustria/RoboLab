@@ -84,9 +84,9 @@ class Odometry:
             return old_cardinal_point
         elif 45 < abs(gamma_in_grad) < 135:
             if gamma_in_grad < 0:
-                return cardinal_points[cardinal_points.index(old_cardinal_point)-1]
+                return cardinal_points[(cardinal_points.index(old_cardinal_point)-1)%4]
             else:
-                return cardinal_points[cardinal_points.index(old_cardinal_point)+1]
+                return cardinal_points[(cardinal_points.index(old_cardinal_point)+1)%4]
         elif 135 < abs(gamma_in_grad) < 225:
             return cardinal_points[cardinal_points.index(old_cardinal_point)+2]
         elif 225 < abs(gamma_in_grad) < 315:
