@@ -2,34 +2,40 @@
 import math
 
 class Odometry:
+
+    #done
     def __init__(self, motor_left, motor_right):
         self.motor_left = motor_left
         self.motor_right = motor_right
         self.tick_list = []
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
-
+    #done
     def reset_list(self):
         self.tick_list = []
 
+    #done
     def reset_position(self):
         self.motor_left.command = "reset"
         self.motor_right.command = "reset"
 
+    #done
     def get_position(self):
         return self.motor_left.position, self.motor_right.position
 
+    #done (diameter_wheel right value?)
     def get_distance(self, ticks_l, ticks_r):
         diameter_wheel = 5.5
         distance_l = diameter_wheel*math.pi*ticks_l/360
         distance_r = diameter_wheel*math.pi*ticks_r/360
         return distance_l, distance_r
 
+    #done (distance_wheels right value?)
     def get_angle_alpha(self, ticks_l, ticks_r):
         dl, dr = self.get_distance(ticks_l, ticks_r)
         distance_wheels = 12
         return (dr-dl)/distance_wheels
 
+    #done
     def get_path_length(self, ticks_l, ticks_r):#alpha in arc measure
         alpha = self.get_angle_alpha(ticks_l, ticks_r)
         if alpha == 0:
@@ -39,26 +45,32 @@ class Odometry:
             dl, dr = self.get_distance(ticks_l, ticks_r)
             return (dr + dl)/alpha*math.sin(alpha/2)
 
+    #done
     def get_dif_x(self, gamma_old, ticks_l, ticks_r):#gamma_old in arc measure
         length = self.get_path_length(ticks_l, ticks_r)
         beta = self.get_angle_alpha(ticks_l, ticks_r)/2
         return -math.sin(gamma_old + beta) * length
 
+    #done
     def get_dif_y(self, gamma_old, ticks_l, ticks_r):#gamma_old in arc measure
         length = self.get_path_length(ticks_l, ticks_r)
         beta = self.get_angle_alpha(ticks_l, ticks_r) / 2
         return math.cos(gamma_old + beta) * length
 
+    #done
     def get_gamma_new(self, gamma_old, ticks_l, ticks_r):#gamma_old, alpha in arc measure
         alpha = self.get_angle_alpha(ticks_l, ticks_r)
         return gamma_old + alpha
 
+    #done
     def add_point(self, tupel_ticks):
         self.tick_list.append(tupel_ticks)
 
+    #done
     def get_tupel_list(self):
         return self.tick_list
 
+    #done (return length not necessary)
     def calculate_values(self, gamma_old):
         length = 0
         dif_x = 0
@@ -78,6 +90,7 @@ class Odometry:
 
         return dif_x, dif_y, gamma, length #length not necessary
 
+    #in progress (replace cardinal_points with enum, does modulo work?)
     def get_cardinal_point(self, gamma_in_grad, old_cardinal_point):
         cardinal_points = ["NORTH", "WEST", "SOUTH", "EAST"] #enum in planet.py
         if abs(gamma_in_grad) > 315 or abs(gamma_in_grad) < 45:
@@ -88,10 +101,10 @@ class Odometry:
             else:
                 return cardinal_points[(cardinal_points.index(old_cardinal_point)+1)%4]
         elif 135 < abs(gamma_in_grad) < 225:
-            return cardinal_points[cardinal_points.index(old_cardinal_point)+2]
+            return cardinal_points[(cardinal_points.index(old_cardinal_point)+2)%4]
         elif 225 < abs(gamma_in_grad) < 315:
             if gamma_in_grad < 0:
-                return cardinal_points[cardinal_points.index(old_cardinal_point)+1]
+                return cardinal_points[(cardinal_points.index(old_cardinal_point)+1)%4]
             else:
-                return cardinal_points[cardinal_points.index(old_cardinal_point)-1]
+                return cardinal_points[(cardinal_points.index(old_cardinal_point)-1)%4]
 
