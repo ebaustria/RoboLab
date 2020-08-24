@@ -115,7 +115,7 @@ class Planet:
 
         for node in self.planet_dict.keys():
             nodes.append(node)
-        
+
         return nodes
 
     def shortest_next_dir(self, start: Tuple[int, int], target: Tuple[int, int]) -> Direction:
