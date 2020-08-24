@@ -57,10 +57,10 @@ class Odometry:
         beta = self.get_angle_alpha(ticks_l, ticks_r) / 2
         return math.cos(gamma_old + beta) * length
 
-    #done
+    #done (mod 2 pi?)
     def get_gamma_new(self, gamma_old, ticks_l, ticks_r):#gamma_old, alpha in arc measure
         alpha = self.get_angle_alpha(ticks_l, ticks_r)
-        return gamma_old + alpha
+        return gamma_old + alpha #mod 2 pi?
 
     #done
     def add_point(self, tupel_ticks):
