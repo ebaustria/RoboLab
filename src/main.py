@@ -62,7 +62,7 @@ def run():
     x_coordinate = 0
     y_coordinate = 0
     #cardinal_points = ["NORTH", "EAST", "SOUTH", "WEST"]
-    direction = "NORTH"  # start direction
+    direction = "WEST"  # start direction
     gamma_old = 0 #for all start directions
 
     counter = 0  # better solution? -> first drive away from node than scan again
@@ -72,12 +72,14 @@ def run():
             if myColorSensor.get_node() == "blue" and counter == 0:
                 # ev3.Sound.speak("Blue")
                 counter += 1
+                # gamma_old everywhere 0 -> in function call change
                 gamma_old, direction, x_coordinate, y_coordinate = \
                     myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected, direction)
                 bottle_detected = 0
             elif myColorSensor.get_node() == "red" and counter == 0:
                 # ev3.Sound.speak("Red")
                 counter += 1
+                #gamma_old everywhere 0 -> in function call change
                 gamma_old, direction, x_coordinate, y_coordinate = \
                     myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected,
                                           direction)
@@ -86,7 +88,7 @@ def run():
                 myMotor.follow_line(0.5, myColorSensor, myOdometry)
                 counter = 0
         myColorSensor.turn_to_angle(180, myMotor)  # turn until next path
-        gamma_old += math.pi
+        gamma_old = math.pi
         gamma_in_grad = gamma_old*360/(2*math.pi)
         direction = myOdometry.get_cardinal_point(gamma_in_grad , direction)
         bottle_detected = 1
