@@ -2,9 +2,6 @@ import ev3dev.ev3 as ev3
 import math
 import time
 
-import motors
-import planet
-
 
 class Ultrasonic:
     def __init__(self):
@@ -19,12 +16,13 @@ class Ultrasonic:
 
 class ColorSensor:
     #done
-    def __init__(self):
+    def __init__(self, motors):
         self.cs = ev3.ColorSensor()
         self.cs.mode = 'RGB-RAW'
         self.red = None
         self.blue = None
-        self.calibrate_colors()
+        self.motors = motors
+
 
     #done
     def get_brightness(self):
@@ -32,7 +30,7 @@ class ColorSensor:
         brightness = math.sqrt(r ** 2 + g ** 2 + b ** 2)
         return brightness
 
-    #in progress
+    #done
     def get_node(self):
         interval = 25 #best interval?
         r, g, b = self.cs.bin_data("hhh")
@@ -49,7 +47,7 @@ class ColorSensor:
         return r, g, b
 
     #in progress
-    def get_neighbour_nodes(self, myMotor):
+    def get_neighbour_nodes(self):
         nodes = []
         angles = [10,10,10,10] #better default values?
 
@@ -71,11 +69,11 @@ class ColorSensor:
                     if 270 not in angles:
                         angles[3] = 270
                 #print("Winkel: " + str(angle))
-            if angle >= 360:
+            if angle >= 370:#360
                 break
             brightness = self.get_brightness()
             angle += 5
-            myMotor.turn_angle(100, 5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
+            self.motors.turn_angle(100, 5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
         return angles
 
         '''
@@ -131,57 +129,29 @@ class ColorSensor:
             pass
 
     #in progress
-    def turn_to_angle(self, angle, myMotor):
-        myMotor.turn_angle(100, angle-45, 5)#speed = 100, angle = angle-45, time = 5-> less time?
+    def rotate_to_path(self, angle):
+        self.motors.turn_angle(100, angle+30, 5)#speed = 100, angle = angle-45, time = 5-> less time?
         brightness = self.get_brightness()
 
         while brightness > 200:
-            myMotor.turn_angle(100, 5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
+            self.motors.turn_angle(100, -5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
             brightness = self.get_brightness()
 
-        myMotor.stop()
+        self.motors.stop()
 
 
-    #in progress (remove prints, values for speed, time etc.)
-    def explore(self, myMotor, myOdometry, gamma_old, x_coordinate, y_coordinate, bottle_detected, old_cardinal_point):
-        myMotor.drive_in_center_of_node(50, 3)#speed = 50, time = 3 -> change for efficiency
-        dif_x, dif_y, gamma, length = myOdometry.calculate_values(gamma_old)
-        gamma_in_grad = gamma * 360 / (2 * math.pi)
-
-        print("New gamma: " + str(gamma_in_grad))#remove prints
-        print("Path length: " + str(length))
-        print("Moved in x-direction: " + str(dif_x))
-        print("Moved in y-direction: " + str(dif_y))
-
-        myOdometry.reset_list()
-
-        print("Gamma in grad: " + str(gamma_in_grad))
-
-        cardinal_point = myOdometry.get_cardinal_point(gamma_in_grad, old_cardinal_point)
-
-        if bottle_detected == 0:
-            if old_cardinal_point == planet.Direction.NORTH:
-                x_coordinate += round(dif_x / 50)#check
-                y_coordinate += round(dif_y / 50)#check
-            elif old_cardinal_point == planet.Direction.SOUTH:
-                x_coordinate -= round(dif_x / 50)#check
-                y_coordinate -= round(dif_y / 50)#check
-            elif old_cardinal_point == planet.Direction.WEST:
-                x_coordinate -= round(dif_y / 50)#check
-                y_coordinate += round(dif_x / 50)#check
-            elif old_cardinal_point == planet.Direction.EAST:
-                x_coordinate += round(dif_y / 50)#check
-                y_coordinate -= round(dif_x / 50)#check
-
-
-
-        print("-------")
-        print("X-Koordinate: " + str(x_coordinate) + " Y-Koordinate: " + str(y_coordinate))
-        print("Blickrichtung: " + str(cardinal_point))
-
-        angles = self.get_neighbour_nodes(myMotor)
+    def analyze(self, old_dir):
+        angles = self.get_neighbour_nodes()
+        print("Angles: " + str(angles))
+        dirs = []
 
         for angle in angles:
+            if angle != 10:
+                dirs.append((angle + old_dir)%360)
+
+        return dirs
+
+        '''for angle in angles:
             print("Winkel: " + str(angle))
 
         if angles[0] != 10:
@@ -191,12 +161,14 @@ class ColorSensor:
         if angles[2] != 10:
             print("z für zurück")
         if angles[3] != 10:
-            print("r für rechts")
+            print("r für rechts")'''
 
+
+
+    '''def select_new_path(self, gamma_in_grad, old_dir, myOdometry):
         next_direction = input()
 
-        if next_direction is "g":
-            next_angle = 0
+        next_angle = 0
         if next_direction is "l":
             next_angle = 90
             gamma_in_grad += 90
@@ -204,19 +176,25 @@ class ColorSensor:
             next_angle = 180
             gamma_in_grad += 180
         if next_direction is "r":
-            next_angle = -90#270
-            gamma_in_grad -= 90#+=270
-
-        #gamma = gamma_in_grad * 2 * math.pi / 360 -> not necessary because gamma already calculated
+            next_angle = -90  # 270
+            gamma_in_grad -= 90  # +=270
 
         print("Gamma in grad: " + str(gamma_in_grad))
-        cardinal_point = myOdometry.get_cardinal_point(gamma_in_grad, old_cardinal_point)
+        dir = myOdometry.get_cardinal_point(gamma_in_grad, old_dir)
 
-        print("Blickrichtung: " + str(cardinal_point))
+        print("Blickrichtung: " + str(dir))
 
-        self.turn_to_angle(next_angle, myMotor)
+        self.turn_to_angle(next_angle)
 
-        return gamma, cardinal_point, x_coordinate, y_coordinate
+        return dir'''
+
+    def select_new_path(self, old_dir, new_dir):
+        angle = new_dir - old_dir
+        if angle > 180:
+            angle -= 360
+
+        print("Angle in select_new_path: " + str(angle))
+        self.rotate_to_path(angle)
 
 
 

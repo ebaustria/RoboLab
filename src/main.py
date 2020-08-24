@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
 
-import ev3dev.ev3 as ev3
+
 import logging
 import os
 import paho.mqtt.client as mqtt
-import math
-import time
 
-from communication import Communication
-from odometry import Odometry
-from planet import Direction, Planet
-from motors import Motors
-from sensors import Ultrasonic, ColorSensor
+from robot import Robot
 
 client = None  # DO NOT EDIT
 
-start = ((0, 0), 0)
-waiting_com = False
-planet_name = None
+
 
 def run():
     # DO NOT CHANGE THESE VARIABLES
@@ -41,84 +33,8 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
-    com = Communication(client, logger)
-
-    myMotor = Motors()
-    myUltrasonic = Ultrasonic()
-    myColorSensor = ColorSensor()
-
-    print("Press Button to start")
-
-    myColorSensor.button_pressed()
-    lm, rm = myMotor.get_motors()
-    myOdometry = Odometry(lm, rm)
-
-    # startkoordinaten
-    x_coordinate = 0
-    y_coordinate = 0
-    direction = 0
-    #cardinal_points = ["NORTH", "EAST", "SOUTH", "WEST"]
-    gamma_old = 0 #for all start directions
-    started = False
-
-    counter = 0  # better solution? -> first drive away from node than scan again
-    bottle_detected = 0 #better solution? -> x- and y-Koordinates do not change when driving back to node
-    while True:
-        global waiting_com, start
-
-        while myUltrasonic.get_distance() > 10:
-            if myColorSensor.get_node() == "blue" and counter == 0:
-                # ev3.Sound.speak("Blue")
-                counter += 1
-                # gamma_old everywhere 0 -> in function call change
-
-                gamma_old, direction, x_coordinate, y_coordinate = \
-                    myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected, direction)
-
-                if not started:
-                    waiting_com = True
-                    com.send_ready()
-
-                    while waiting_com:
-                        pass
-                    x_coordinate = start[0][0]
-                    y_coordinate = start[0][1]
-                    direction = start[1]
-                    started = True
-
-                # set new start
-#                start = ((x_coordinate, y_coordinate), direction)
-                bottle_detected = 0
-            elif myColorSensor.get_node() == "red" and counter == 0:
-                # ev3.Sound.speak("Red")
-                counter += 1
-                #gamma_old everywhere 0 -> in function call change
-
-                gamma_old, direction, x_coordinate, y_coordinate = \
-                    myColorSensor.explore(myMotor, myOdometry, 0, x_coordinate, y_coordinate, bottle_detected, direction)
-
-                if not started:
-                    waiting_com = True
-                    com.send_ready()
-
-                    while waiting_com:
-                        pass
-                    x_coordinate = start[0][0]
-                    y_coordinate = start[0][1]
-                    direction = start[1]
-                    started = True
-
-             #   start = ((x_coordinate, y_coordinate), direction)
-                bottle_detected = 0
-            else:
-                myMotor.follow_line(0.5, myColorSensor, myOdometry)
-                counter = 0
-        myColorSensor.turn_to_angle(180, myMotor)  # turn until next path
-        gamma_old = math.pi
-        gamma_in_grad = gamma_old*360/(2*math.pi)
-        direction = myOdometry.get_cardinal_point(gamma_in_grad, direction)
-        bottle_detected = 1
-    # my changes end
+    robot = Robot(client, logger)
+    robot.run()
 
 
 # DO NOT EDIT

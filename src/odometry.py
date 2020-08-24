@@ -1,7 +1,6 @@
 # !/usr/bin/env python3
 import math
-
-import planet
+from planet import Direction
 
 
 class Odometry:
@@ -74,15 +73,23 @@ class Odometry:
         return self.tick_list
 
     #done (return length not necessary)
-    def calculate_values(self, gamma_old):
+    def calculate_values(self):
         length = 0
         dif_x = 0
         dif_y = 0
         gamma = 0
+        gamma_old = 0
 
-        for tupel in self.get_tupel_list():
-            ticks_l = tupel[0]
-            ticks_r = tupel[1]
+        #test start
+        l = self.get_tupel_list()
+        for i in range(5, len(l)):
+            ticks_l = l[i][0]
+            ticks_r = l[i][1]
+        #test end
+
+        #for tupel in :
+        #    ticks_l = tupel[0]
+        #    ticks_r = tupel[1]
 
             dif_x += self.get_dif_x(gamma_old, ticks_l, ticks_r)
             dif_y += self.get_dif_y(gamma_old, ticks_l, ticks_r)
@@ -94,20 +101,59 @@ class Odometry:
         return dif_x, dif_y, gamma, length #length not necessary
 
     #in progress (replace cardinal_points with enum, does modulo work?)
-    def get_cardinal_point(self, gamma_in_grad, old_cardinal_point):
-        cardinal_points = [planet.Direction.NORTH, planet.Direction.WEST, planet.Direction.SOUTH, planet.Direction.EAST] #enum in planet.py
+    def get_cardinal_point(self, gamma_in_grad, old_dir):
+        cardinal_points = [Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST] #enum in planet.py
         if abs(gamma_in_grad) > 315 or abs(gamma_in_grad) < 45:
-            return old_cardinal_point
+            return old_dir
         elif 45 < abs(gamma_in_grad) < 135:
             if gamma_in_grad < 0:
-                return cardinal_points[(cardinal_points.index(old_cardinal_point)-1)%4]
+                return cardinal_points[(cardinal_points.index(old_dir)-1)%4]
             else:
-                return cardinal_points[(cardinal_points.index(old_cardinal_point)+1)%4]
+                return cardinal_points[(cardinal_points.index(old_dir)+1)%4]
         elif 135 < abs(gamma_in_grad) < 225:
-            return cardinal_points[(cardinal_points.index(old_cardinal_point)+2)%4]
+            return cardinal_points[(cardinal_points.index(old_dir)+2)%4]
         elif 225 < abs(gamma_in_grad) < 315:
             if gamma_in_grad < 0:
-                return cardinal_points[(cardinal_points.index(old_cardinal_point)+1)%4]
+                return cardinal_points[(cardinal_points.index(old_dir)+1)%4]
             else:
-                return cardinal_points[(cardinal_points.index(old_cardinal_point)-1)%4]
+                return cardinal_points[(cardinal_points.index(old_dir)-1)%4]
+
+    def calculate_path(self, old_dir, bottle_detected, x, y):
+        if bottle_detected:
+            self.reset_list()
+            print("Bottle on path")
+            return x, y, (old_dir+180)%360
+
+        dif_x, dif_y, gamma, length = self.calculate_values()#length not needed
+        gamma_in_grad = gamma * 360 / (2 * math.pi)
+
+        print("New gamma: " + str(gamma_in_grad))  # remove prints
+        print("Path length: " + str(length))
+        print("Moved in x-direction: " + str(dif_x))
+        print("Moved in y-direction: " + str(dif_y))
+
+        self.reset_list()
+
+        dir = self.get_cardinal_point(gamma_in_grad, old_dir)
+
+        unit = 45
+
+        if old_dir == Direction.NORTH:#50 as variable
+            x += round(dif_x / unit)  # check
+            y += round(dif_y / unit)  # check
+        elif old_dir == Direction.SOUTH:
+            x -= round(dif_x / unit)  # check
+            y -= round(dif_y / unit)  # check
+        elif old_dir == Direction.WEST:
+            x -= round(dif_y / unit)  # check
+            y += round(dif_x / unit)  # check
+        elif old_dir == Direction.EAST:
+            x += round(dif_y / unit)  # check
+            y -= round(dif_x / unit)  # check
+
+        print("-------")
+        print("X-Koordinate: " + str(x) + " Y-Koordinate: " + str(y))
+        print("Blickrichtung: " + str(dir))
+
+        return x, y, dir
 

@@ -1,15 +1,12 @@
 import ev3dev.ev3 as ev3
 import time
 import math
-from sensors import ColorSensor
-from odometry import Odometry
-from robot import Robot
 
 class Motors:
-    def __init__(self, robot: Robot):
+    def __init__(self):
         self.rm = ev3.LargeMotor("outB")
         self.lm = ev3.LargeMotor("outC")
-        self.robot = robot
+        #self.robot = robot
 
     #in progress (all commands necessary? better command than "run-forever"?)
     def drive_forward(self, speed, duration):
@@ -160,8 +157,8 @@ class Motors:
 
     def turn_angle(self, speed, angle, duration):
 
-        self.rm.position_sp = angle * 2 #2 for speed = 100 (2.2 calculated and tested?)
-        self.lm.position_sp = (-1) * angle * 2 #for one rotation -> wheels 2.2 rotations
+        self.rm.position_sp = -angle * 2 #2 for speed = 100 (2.2 calculated and tested?)
+        self.lm.position_sp = angle * 2 #for one rotation -> wheels 2.2 rotations
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
         self.rm.command = "run-to-rel-pos"

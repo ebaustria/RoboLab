@@ -7,9 +7,7 @@ import ssl
 from time import time
 from typing import Tuple
 
-import main
 from planet import Path, Direction
-from robot import Robot
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -23,7 +21,7 @@ class Communication:
     thereby solve the task according to the specifications
     """
 
-    def __init__(self, mqtt_client, logger, robot: Robot=None):
+    def __init__(self, mqtt_client, logger, robot=None):
         """
         Initializes communication module, connect to server, subscribe, etc.
         :param mqtt_client: paho.mqtt.client.Client
@@ -88,8 +86,8 @@ class Communication:
             """
 
             # Read and print message
-            msg = payload["payload"]["message"]
-            self.logger.debug(msg)
+            #msg = payload["payload"]["message"]
+            #self.logger.debug(msg)
         # ready-Message
         elif payload_type == "planet":
             """
@@ -108,13 +106,13 @@ class Communication:
             """
 
             # Read information from payload
-            self.robot.planet_name = payload["payload"]["planetName"]
+
             start_x = payload["payload"]["startX"]
             start_y = payload["payload"]["startY"]
             start_dir = payload["payload"]["startOrientation"]
 
-            # TODO Save into robot
-            start = ((start_x, start_y), start_dir)
+            self.robot.start_location = ((start_x, start_y), start_dir)
+            self.robot.planet_name = payload["payload"]["planetName"]
 
             # Subscribe to planet channel
             self.client.subscribe('planet/%s/117' % self.robot.planet_name, qos=1)
@@ -155,8 +153,8 @@ class Communication:
             if blocked:
                 weight = -1
 
-            # TODO Save end position as new start position
             self.robot.planet.add_path(start, end, weight)
+            self.robot.end_location = end
 
             pass
         # pathSelect-Message
@@ -303,7 +301,7 @@ class Communication:
 
         self.send_message("explorer/117", payload)
 
-    def send_path(self, path: Path, blocked: bool):
+    def send_path(self, start: Tuple[Tuple[int, int], Direction], end: Tuple[Tuple[int, int], Direction], blocked: bool):
         """
         Sends to the mothership the path-Message 
         with the information about the path and
@@ -331,12 +329,12 @@ class Communication:
             "from": "client",
             "type": "path",
             "payload": {
-                "startX": path.start[0],
-                "startY": path.start[1],
-                "startDirection": path.start_dir,
-                "endX": path.target[0],
-                "endY": path.target[1],
-                "endDirection": path.end_dir,
+                "startX": start[0][0],
+                "startY": start[0][1],
+                "startDirection": start[1],
+                "endX": end[0][0],
+                "endY": end[0][1],
+                "endDirection": end[1],
                 "pathStatus": path_status
             }
         }
