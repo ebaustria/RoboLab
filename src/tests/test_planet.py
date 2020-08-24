@@ -81,15 +81,16 @@ class TestRoboLabPlanet(unittest.TestCase):
             planet blocked:
             X = blocked edge
             
-        +----(0, 2)------3------(2, 2)----+
-        |       |                  |      |
-        |       |       +----2-----+      |
-        1       |       |                 1
-        |       X-----(1, 1)---X          |
-        |               |      |          |
-        +----(0, 0)-----X      +--(2, 0)--+
-                |                   |
-                +---------2---------+
+        +----(0, 2)------3-------(2, 2)----+
+        |       |                  |       |
+        |       |                  |       |
+        |       |       +----X-----+       |
+        1       |       |                  1
+        |       X-----(1, 1)---X           |
+        |               |      |           |
+        +----(0, 0)-----X      +---(2, 0)--+
+                |                    |
+                +---------2----------+
         """
         self.blocked = Planet()
 
@@ -100,16 +101,16 @@ class TestRoboLabPlanet(unittest.TestCase):
         self.blocked.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 3)
         self.blocked.add_path(((2, 0), Direction.WEST), ((1, 1), Direction.EAST), -1)
         self.blocked.add_path(((2, 0), Direction.EAST), ((2, 2), Direction.EAST), 1)
-        self.blocked.add_path(((2, 2), Direction.SOUTH), ((1, 1), Direction.NORTH), 2)
+        self.blocked.add_path(((2, 2), Direction.SOUTH), ((1, 1), Direction.NORTH), -1)
 
         """
         planet big:
         X = blocked edge
         
-            +-1-+
-            |   |
-            |   |
-        (-1, 3)-+                            (3, 3)-------1---------+
+            +-1-+                         +--1-+
+            |   |                         |    |
+            |   |                         |    |
+        (-1, 3)-+                         +--(3, 3)-------1---------+
                                                 |                   |
                   +-------1--------+            2                   |
                   |                |            |                   |
@@ -143,6 +144,35 @@ class TestRoboLabPlanet(unittest.TestCase):
         self.big.add_path(((3, 2), Direction.NORTH), ((3, 3), Direction.SOUTH), 2)
         self.big.add_path(((3, 3), Direction.EAST), ((4, 1), Direction.EAST), 1)
         self.big.add_path(((4, 1), Direction.SOUTH), ((4, -1), Direction.NORTH), 1)
+        self.big.add_path(((3, 3), Direction.WEST), ((3, 3), Direction.NORTH), 1)
+
+        """
+        planet one_path:
+        X = blocked edge
+                           +---X----(3, 3)-----+
+                           |          |        |
+                           |          |        |
+        (0, 2)-----X-----(2, 2)---1---+        |
+          |                |                   |
+          |                |                   |
+          X                X                   |
+          |                |                   |
+          |                |                   |
+        (0, 0)-----X-----(2, 0)--------4-------+
+          |                |
+          +--------1-------+
+        """
+
+        self.one_path = Planet()
+
+        self.one_path.add_path(((0, 0), Direction.NORTH), ((0, 2), Direction.SOUTH), -1)
+        self.one_path.add_path(((0, 0), Direction.EAST), ((2, 0), Direction.WEST), -1)
+        self.one_path.add_path(((0, 0), Direction.SOUTH), ((2, 0), Direction.SOUTH), 1)
+        self.one_path.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), -1)
+        self.one_path.add_path(((2, 0), Direction.NORTH), ((2, 2), Direction.SOUTH), -1)
+        self.one_path.add_path(((2, 0), Direction.EAST), ((3, 3), Direction.EAST), 4)
+        self.one_path.add_path(((2, 2), Direction.NORTH), ((3, 3), Direction.WEST), -1)
+        self.one_path.add_path(((2, 2), Direction.EAST), ((3, 3), Direction.SOUTH), 1)
 
         self.empty = Planet()
 
@@ -180,21 +210,25 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
 
         path_1 = self.planet.shortest_path((0, 0), (2, 2))
+        path_2 = self.big.shortest_path((3, 2), (2, 0))
+        path_3 = self.blocked.shortest_path((2, 0), (0, 2))
 
         self.assertEqual([((0, 0), Direction.EAST), ((2, 0), Direction.NORTH)], path_1)
-
-        path_2 = self.blocked.shortest_path((0, 0), (1, 1))
-
-        self.assertEqual([((0, 0), Direction.SOUTH), ((2, 0), Direction.EAST), ((2, 2), Direction.SOUTH)], path_2)
+        self.assertEqual([((3, 2), Direction.SOUTH), ((3, 1), Direction.WEST), ((2, 2), Direction.SOUTH)], path_2)
+        self.assertEqual([((2, 0), Direction.SOUTH), ((0, 0), Direction.WEST)], path_3)
 
     def test_target_not_reachable(self):
         """
         This test should check that a target outside the map or at an unexplored node is not reachable
         """
         # (3, 3) is not in the map and is therefore currently unexplored/unreachable.
-        c = self.planet.shortest_path((0, 0), (3, 3))
+        path_1 = self.planet.shortest_path((0, 0), (3, 3))
 
-        self.assertIsNone(c)
+        # (-1, -1) is not in the map and is therefore currently unexplored/unreachable.
+        path_2 = self.planet.shortest_path((0, 0), (-1, -1))
+
+        self.assertIsNone(path_1)
+        self.assertIsNone(path_2)
 
     def test_same_length(self):
         """
@@ -240,13 +274,62 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
 
         # (-1, 3) is located in the map but cannot be reached.
-        b = self.big.shortest_path((0, 0), (-1, 3))
+        path_1 = self.big.shortest_path((0, 0), (-1, 3))
 
         # (3, 2) is located in the map but cannot be reached.
-        c = self.same.shortest_path((0, 0), (3, 2))
+        path_2 = self.same.shortest_path((0, 0), (3, 2))
 
-        self.assertIsNone(b)
-        self.assertIsNone(c)
+        self.assertIsNone(path_1)
+        self.assertIsNone(path_2)
+
+    def test_target_reached(self):
+        """
+        This test checks that the shortest-path algorithm recognizes when the robot has reached the target.
+
+        Result: Target reached
+        """
+
+        path = self.blocked.shortest_path((0, 0), (0, 0))
+        self.assertFalse(path)
+
+    def test_target_blocked(self):
+        """
+        This test checks that the shortest-path algorithm will not return a shortest path or get caught in a loop when
+        the target is only connected to blocked edges.
+
+        Result: Target is unreachable
+        """
+
+        path_1 = self.big.shortest_path((0, 0), (3, 0))
+        path_2 = self.blocked.shortest_path((0, 0), (1, 1))
+
+        self.assertIsNone(path_1)
+        self.assertIsNone(path_2)
+
+    def test_start_blocked(self):
+        """
+        This test checks that the shortest-path algorithm will not return a shortest path or get caught in a loop when
+        the start node is only connected to blocked edges.
+
+        Result: Target is unreachable
+        """
+
+        path_1 = self.big.shortest_path((3, 0), (0, 0))
+        path_2 = self.blocked.shortest_path((1, 1), (0, 0))
+
+        self.assertIsNone(path_1)
+        self.assertIsNone(path_2)
+
+    def avoid_blocked(self):
+        """
+        This test checks that the shortest-path algorithm avoids blocked edges when searching for a shortest path.
+
+        Result: Target is reachable
+        """
+
+        path = self.one_path.shortest_path((0, 0), (2, 2))
+
+        self.assertEqual([((0, 0), Direction.SOUTH), ((2, 0), Direction.EAST), ((3, 3), Direction.SOUTH)], path)
 
 
 if __name__ == "__main__":
