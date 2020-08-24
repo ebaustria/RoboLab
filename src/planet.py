@@ -73,20 +73,17 @@ class Planet:
 
         path_to_add = Path(start[0], target[0], weight, start[1], target[1])
 
-        if path_to_add.start not in self.planet_dict:
+        if path_to_add.start not in self.planet_dict and path_to_add.start is not None:
             self.planet_dict[path_to_add.start] = {}
-            self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
-                                                                          path_to_add.weight)
-        else:
-            self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
-                                                                          path_to_add.weight)
+
         if path_to_add.target not in self.planet_dict and path_to_add.target is not None:
             self.planet_dict[path_to_add.target] = {}
-            self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
-                                                                         path_to_add.weight)
-        else:
-            self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
-                                                                         path_to_add.weight)
+
+        self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
+                                                                      path_to_add.weight)
+
+        self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
+                                                                     path_to_add.weight)
 
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
