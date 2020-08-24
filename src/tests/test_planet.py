@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from src.planet import Direction, Planet
+from planet import Direction, Planet
 
 
 class ExampleTestPlanet(unittest.TestCase):
@@ -46,7 +46,6 @@ class TestRoboLabPlanet(unittest.TestCase):
         MODEL YOUR TEST PLANET HERE (if you'd like):
 
         """
-        # Initialize your data structure here
         self.planet = Planet()
 
         self.planet.add_path(((0, 0), Direction.EAST), ((2, 0), Direction.WEST), 2)
@@ -54,6 +53,31 @@ class TestRoboLabPlanet(unittest.TestCase):
         self.planet.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 4)
         self.planet.add_path(((2, 2), Direction.SOUTH), ((2, 0), Direction.NORTH), 2)
         self.planet.add_path(((1, 2), Direction.WEST), ((1, 2), Direction.NORTH), 1)
+
+        """
+                planet same:
+
+                                            +--1--+
+                (0, 2)---4---(2, 2)         |     |
+                   |            |           |     |
+                   1            2           +---(3, 2)
+                   |            |
+                (0, 0)---1---(2, 0)
+                   |            |
+                   |            |
+                   +-----1------+
+        """
+
+        self.same = Planet()
+
+        self.same.add_path(((0, 0), Direction.EAST), ((2, 0), Direction.WEST), 1)
+        self.same.add_path(((0, 0), Direction.NORTH), ((0, 2), Direction.SOUTH), 1)
+        self.same.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 4)
+        self.same.add_path(((2, 0), Direction.NORTH), ((2, 2), Direction.SOUTH), 2)
+        self.same.add_path(((3, 2), Direction.WEST), ((3, 2), Direction.NORTH), 1)
+        self.same.add_path(((0, 0), Direction.SOUTH), ((2, 0), Direction.SOUTH), 1)
+
+        self.empty = Planet()
 
     def test_integrity(self):
         """
@@ -76,8 +100,8 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         This test should check that an empty planet really is empty
         """
-        self.p = Planet()
-        empty_planet = self.p.planet_dict
+
+        empty_planet = self.empty.planet_dict
 
         self.assertFalse(empty_planet)
 
@@ -87,13 +111,19 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum distance is three nodes (two paths in list returned)
         """
-        self.fail('implement me!')
+
+        path = self.planet.shortest_path((0, 0), (2, 2))
+
+        self.assertEqual([((0, 0), Direction.EAST), ((2, 0), Direction.NORTH)], path)
 
     def test_target_not_reachable(self):
         """
         This test should check that a target outside the map or at an unexplored node is not reachable
         """
-        self.fail('implement me!')
+        # (3, 3) is not in the map and is therefore currently unexplored/unreachable.
+        c = self.planet.shortest_path((0, 0), (3, 3))
+
+        self.assertIsNone(c)
 
     def test_same_length(self):
         """
@@ -102,7 +132,15 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum of two paths with same cost exists, only one is returned by the logic implemented
         """
-        self.fail('implement me!')
+
+        shortest_same = self.same.shortest_path((0, 0), (2, 2))
+
+        my_list_of_paths = []
+        my_list_of_paths.append(shortest_same)
+
+        self.assertEqual(len(shortest_same), 2)
+        self.assertEqual(len(my_list_of_paths), 1)
+        self.assertEqual([((0, 0), Direction.EAST), ((2, 0), Direction.NORTH)], shortest_same)
 
     def test_target_with_loop(self):
         """
@@ -111,7 +149,8 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is reachable
         """
-        self.fail('implement me!')
+        # TO-DO think more about this unit test
+        self.same.shortest_path((0, 0), (2, 2))
 
     def test_target_not_reachable_with_loop(self):
         """
@@ -120,7 +159,11 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is not reachable
         """
-        self.fail('implement me!')
+
+        # (3, 2) is located in the map but cannot be reached.
+        c = self.same.shortest_path((0, 0), (3, 2))
+
+        self.assertIsNone(c)
 
 
 if __name__ == "__main__":

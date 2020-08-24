@@ -43,8 +43,6 @@ def run():
 
     com = Communication(client, logger)
 
-    # my changes start
-
     myMotor = Motors()
     myUltrasonic = Ultrasonic()
     myColorSensor = ColorSensor()
@@ -122,7 +120,6 @@ def run():
         bottle_detected = 1
     # my changes end
 
-    # print("Hello World!")
 
 # DO NOT EDIT
 if __name__ == '__main__':

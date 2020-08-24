@@ -4,10 +4,12 @@
 import json
 import platform
 import ssl
+from time import time
 from typing import Tuple
 
 import main
 from planet import Path, Direction
+from robot import Robot
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -21,7 +23,7 @@ class Communication:
     thereby solve the task according to the specifications
     """
 
-    def __init__(self, mqtt_client, logger):
+    def __init__(self, mqtt_client, logger, robot: Robot=None):
         """
         Initializes communication module, connect to server, subscribe, etc.
         :param mqtt_client: paho.mqtt.client.Client
@@ -32,6 +34,8 @@ class Communication:
         self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
+
+        self.robot = robot
 
         self.client.username_pw_set('117', password='0QOfuyjhr0')  # Your group credentials
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
@@ -61,11 +65,11 @@ class Communication:
 
         # YOUR CODE FOLLOWS
 
-        print("<<< " + message.payload.decode('utf-8'))
-
         # Ignore messages from client
         if payload["from"] == "client":
             return
+
+        print("<<< " + message.payload.decode('utf-8'))
 
         # Get type of payload
         payload_type = payload["type"]
@@ -104,15 +108,16 @@ class Communication:
             """
 
             # Read information from payload
-            main.planet_name = payload["payload"]["planetName"]
+            self.robot.planet_name = payload["payload"]["planetName"]
             start_x = payload["payload"]["startX"]
             start_y = payload["payload"]["startY"]
             start_dir = payload["payload"]["startOrientation"]
 
-            main.start = ((start_x, start_y), start_dir)
+            # TODO Save into robot
+            start = ((start_x, start_y), start_dir)
 
             # Subscribe to planet channel
-            self.client.subscribe('planet/%s/117' % main.planet_name, qos=1)
+            self.client.subscribe('planet/%s/117' % self.robot.planet_name, qos=1)
         # path-Message
         elif payload_type == "path":
             """
@@ -147,11 +152,11 @@ class Communication:
             start = ((start_x, start_y), start_dir)
             end = ((end_x, end_y), end_dir)
 
-            # TODO add Path to planet and check if it's blocked
             if blocked:
-                pass
-            else:
-                pass
+                weight = -1
+
+            # TODO Save end position as new start position
+            self.robot.planet.add_path(start, end, weight)
 
             pass
         # pathSelect-Message
@@ -169,7 +174,7 @@ class Communication:
 
             start_dir = payload["payload"]["startDirection"]
 
-            # TODO use direction to correct data
+            # TODO change robot direction
 
             pass
         # pathUnveiled-Message
@@ -205,11 +210,10 @@ class Communication:
             start = ((start_x, start_y), start_dir)
             end = ((end_x, end_y), end_dir)
 
-            # TODO add Path to planet and check if it's blocked
             if blocked:
-                pass
-            else:
-                pass
+                weight = -1
+
+            self.robot.planet.add_path(start, end, weight)
 
             pass
         # target-Message
@@ -231,7 +235,7 @@ class Communication:
             
             target = (target_x, target_y)
             
-            # TODO set global target and check if it's reachable
+            self.robot.planet.target = target
 
             pass
         # done-Message
@@ -250,13 +254,12 @@ class Communication:
             msg = payload["payload"]["message"]
             self.logger.debug(msg)
 
-            # TODO exit programm
-
+            self.robot.running = False
             pass
         else:
             raise Exception("Invalid Messagetype")
 
-        main.waiting_com = False
+        self.robot.last_packet = time()
 
     def send_planet_name(self, name: str):
         """
@@ -338,7 +341,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % main.planet_name, payload)
+        self.send_message("planet/%s/117" % self.robot.planet_name, payload)
         
     def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
         """
@@ -367,7 +370,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % main.planet_name, payload)
+        self.send_message("planet/%s/117" % self.robot.planet_name, payload)
         
     def send_target_reached(self, msg: str):
         """
@@ -392,7 +395,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % main.planet_name, payload)
+        self.send_message("planet/%s/117" % self.robot.planet_name, payload)
         
     def send_exploration_completed(self, msg: str):
         """
@@ -417,7 +420,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % main.planet_name, payload)
+        self.send_message("planet/%s/117" % self.robot.planet_name, payload)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
