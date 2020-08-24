@@ -339,7 +339,7 @@ class Communication:
 
         self.send_message("planet/%s/117" % self.robot.planet_name, payload)
         
-    def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
+    def send_path_select(self, choice: object) -> object:
         """
         Sends to the mothership the pathSelect-Message 
         with the information about which path roboter will take
