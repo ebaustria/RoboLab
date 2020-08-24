@@ -3,6 +3,7 @@ import math
 import time
 
 import motors
+import planet
 
 
 class Ultrasonic:
@@ -159,16 +160,16 @@ class ColorSensor:
         cardinal_point = myOdometry.get_cardinal_point(gamma_in_grad, old_cardinal_point)
 
         if bottle_detected == 0:
-            if old_cardinal_point == "NORTH":
+            if old_cardinal_point == planet.Direction.NORTH:
                 x_coordinate += round(dif_x / 50)#check
                 y_coordinate += round(dif_y / 50)#check
-            elif old_cardinal_point == "SOUTH":
+            elif old_cardinal_point == planet.Direction.SOUTH:
                 x_coordinate -= round(dif_x / 50)#check
                 y_coordinate -= round(dif_y / 50)#check
-            elif old_cardinal_point == "WEST":
+            elif old_cardinal_point == planet.Direction.WEST:
                 x_coordinate -= round(dif_y / 50)#check
                 y_coordinate += round(dif_x / 50)#check
-            elif old_cardinal_point == "EAST":
+            elif old_cardinal_point == planet.Direction.EAST:
                 x_coordinate += round(dif_y / 50)#check
                 y_coordinate -= round(dif_x / 50)#check
 
@@ -176,7 +177,7 @@ class ColorSensor:
 
         print("-------")
         print("X-Koordinate: " + str(x_coordinate) + " Y-Koordinate: " + str(y_coordinate))
-        print("Blickrichtung: " + cardinal_point)
+        print("Blickrichtung: " + str(cardinal_point))
 
         angles = self.get_neighbour_nodes(myMotor)
 
@@ -211,7 +212,7 @@ class ColorSensor:
         print("Gamma in grad: " + str(gamma_in_grad))
         cardinal_point = myOdometry.get_cardinal_point(gamma_in_grad, old_cardinal_point)
 
-        print("Blickrichtung: " + cardinal_point)
+        print("Blickrichtung: " + str(cardinal_point))
 
         self.turn_to_angle(next_angle, myMotor)
 

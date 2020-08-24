@@ -1,6 +1,9 @@
 # !/usr/bin/env python3
 import math
 
+import planet
+
+
 class Odometry:
 
     #done
@@ -92,7 +95,7 @@ class Odometry:
 
     #in progress (replace cardinal_points with enum, does modulo work?)
     def get_cardinal_point(self, gamma_in_grad, old_cardinal_point):
-        cardinal_points = ["NORTH", "WEST", "SOUTH", "EAST"] #enum in planet.py
+        cardinal_points = [planet.Direction.NORTH, planet.Direction.WEST, planet.Direction.SOUTH, planet.Direction.EAST] #enum in planet.py
         if abs(gamma_in_grad) > 315 or abs(gamma_in_grad) < 45:
             return old_cardinal_point
         elif 45 < abs(gamma_in_grad) < 135:

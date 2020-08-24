@@ -6,6 +6,7 @@ import platform
 import ssl
 from typing import Tuple
 
+import main
 from planet import Path, Direction
 
 # Fix: SSL certificate problem on macOS
@@ -31,8 +32,6 @@ class Communication:
         self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
-
-        self.planet_name = None
 
         self.client.username_pw_set('117', password='0QOfuyjhr0')  # Your group credentials
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
@@ -61,6 +60,8 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
 
         # YOUR CODE FOLLOWS
+
+        print("<<< " + message.payload.decode('utf-8'))
 
         # Ignore messages from client
         if payload["from"] == "client":
@@ -103,17 +104,15 @@ class Communication:
             """
 
             # Read information from payload
-            self.planet_name = payload["payload"]["planetName"]
+            main.planet_name = payload["payload"]["planetName"]
             start_x = payload["payload"]["startX"]
             start_y = payload["payload"]["startY"]
             start_dir = payload["payload"]["startOrientation"]
 
-            start = ((start_x, start_y), start_dir)
-
-            # TODO use start and name somewhere 
+            main.start = ((start_x, start_y), start_dir)
 
             # Subscribe to planet channel
-            self.client.subscribe('planet/%s/117' % self.planet_name, qos=1)
+            self.client.subscribe('planet/%s/117' % main.planet_name, qos=1)
         # path-Message
         elif payload_type == "path":
             """
@@ -142,7 +141,7 @@ class Communication:
             end_x = payload["payload"]["endX"]
             end_y = payload["payload"]["endY"]
             end_dir = payload["payload"]["endDirection"]
-            blocked = payload["payload"]["pathStatus"]
+            blocked = payload["payload"]["pathStatus"] == "blocked"
             weight = payload["payload"]["pathWeight"]
 
             start = ((start_x, start_y), start_dir)
@@ -200,7 +199,7 @@ class Communication:
             end_x = payload["payload"]["endX"]
             end_y = payload["payload"]["endY"]
             end_dir = payload["payload"]["endDirection"]
-            blocked = payload["payload"]["pathStatus"]
+            blocked = payload["payload"]["pathStatus"] == "blocked"
             weight = payload["payload"]["pathWeight"]
 
             start = ((start_x, start_y), start_dir)
@@ -256,6 +255,8 @@ class Communication:
             pass
         else:
             raise Exception("Invalid Messagetype")
+
+        main.waiting_com = False
 
     def send_planet_name(self, name: str):
         """
@@ -337,7 +338,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % self.planet_name, payload)
+        self.send_message("planet/%s/117" % main.planet_name, payload)
         
     def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
         """
@@ -366,7 +367,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % self.planet_name, payload)
+        self.send_message("planet/%s/117" % main.planet_name, payload)
         
     def send_target_reached(self, msg: str):
         """
@@ -391,7 +392,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % self.planet_name, payload)
+        self.send_message("planet/%s/117" % main.planet_name, payload)
         
     def send_exploration_completed(self, msg: str):
         """
@@ -416,7 +417,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % self.planet_name, payload)
+        self.send_message("planet/%s/117" % main.planet_name, payload)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -433,6 +434,7 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS
+        print(">>> " + json.dumps(message))
         self.client.publish(topic, payload=json.dumps(message), qos=1)
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
