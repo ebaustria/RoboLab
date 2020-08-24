@@ -48,7 +48,8 @@ class Planet:
         """ Initializes the data structure """
         self.target = None
         self.planet_dict = {}
-        self.blocked_paths = []
+        self.scanned_nodes = []
+        self.unexplored_edges = {}
 
     # If the start point of the path to add is not in the planet dictionary, an entry is created for it. The key is the
     # start point, and the value is a dictionary. The start direction is added to the inner dictionary as a key. A tuple
@@ -108,6 +109,19 @@ class Planet:
         """
 
         return self.planet_dict
+
+    def get_nodes(self) -> List:
+        nodes = []
+
+        for node in self.planet_dict.keys():
+            nodes.append(node)
+        
+        return nodes
+
+    def shortest_next_dir(self, start: Tuple[int, int], target: Tuple[int, int]) -> Direction:
+        shortest_path = self.shortest_path(start, target)
+
+        return shortest_path[0][1]
 
     # Implementation of Dijkstra's algorithm.
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int],
