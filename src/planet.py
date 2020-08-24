@@ -155,6 +155,11 @@ class Planet:
             print("Target is unexplored.")
             return None
 
+        # If no path exists between the start node and the target, return None.
+        if not self.path_exists(start, target):
+            print("Target is unreachable.")
+            return None
+
         # All nodes are marked unvisited. The start node is given the tentative distance of 0, and the other nodes are
         # given the tentative distance of infinity.
         for node in self.planet_dict.keys():
@@ -162,11 +167,6 @@ class Planet:
                 unvisited[node] = 0
             else:
                 unvisited[node] = math.inf
-
-        # If no path exists between the start node and the target, return None.
-        if not self.path_exists(start, target):
-            print("Target is unreachable.")
-            return None
 
         # As long as the target has not been visited, iterate over the neighbors of the current node. If the neighbor is
         # unvisited and the weight of the edge that connects it to the current node is not -1 (i.e. the path is not
