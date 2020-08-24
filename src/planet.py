@@ -107,7 +107,7 @@ class Planet:
 
         return self.planet_dict
 
-    def get_nodes(self) -> List:
+    def get_nodes(self) -> List[Tuple[int, int]]:
         nodes = []
 
         for node in self.planet_dict.keys():
@@ -119,6 +119,13 @@ class Planet:
         shortest_path = self.shortest_path(start, target)
 
         return shortest_path[0][1]
+
+    def add_unexplored_edge(self, node: Tuple[int, int], direction: Direction) -> None:
+
+        if node not in self.unexplored_edges:
+            self.unexplored_edges[node] = []
+
+        self.unexplored_edges[node].append(direction)
 
     # Implementation of Dijkstra's algorithm.
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int],
