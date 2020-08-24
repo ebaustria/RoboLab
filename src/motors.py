@@ -166,9 +166,11 @@ class Motors:
         time.sleep(duration)#wait.until?
 
     #done
-    def drive_in_center_of_node(self, speed, duration):
+    def drive_in_center_of_node(self, speed, duration, odometry):
         self.stop()
+        odometry.reset_position()#new
         self.drive_forward(speed, duration)
+        odometry.add_point(odometry.get_position())#new
         self.stop()
 
     #done

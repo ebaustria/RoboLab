@@ -170,9 +170,7 @@ class Communication:
             }
             """
 
-            start_dir = payload["payload"]["startDirection"]
-
-            # TODO change robot direction
+            self.robot.path_choice = payload["payload"]["startDirection"]
 
             pass
         # pathUnveiled-Message

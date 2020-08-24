@@ -82,7 +82,7 @@ class Odometry:
 
         #test start
         l = self.get_tupel_list()
-        for i in range(5, len(l)):
+        for i in range(10, len(l)):
             ticks_l = l[i][0]
             ticks_r = l[i][1]
         #test end
@@ -151,7 +151,7 @@ class Odometry:
             x += round(dif_y / unit)  # check
             y -= round(dif_x / unit)  # check
 
-        print("-------")
+
         print("X-Koordinate: " + str(x) + " Y-Koordinate: " + str(y))
         print("Blickrichtung: " + str(dir))
 

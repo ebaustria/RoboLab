@@ -26,6 +26,7 @@ class Robot:
         self.us = Ultrasonic()
         self.start_location = None
         self.end_location = None
+        self.path_choice = None
         self.running = True
         self.explore_mode = True
 
@@ -51,7 +52,7 @@ class Robot:
             if (self.cs.get_node() == "blue" or self.cs.get_node() == "red") and counter == 0:
                 counter += 1
 
-                self.motors.drive_in_center_of_node(50, 3)  # speed = 50, time = 3 -> change for efficiency
+                self.motors.drive_in_center_of_node(50, 3.5, self.odometry)  # speed = 50, time = 3 -> change for efficiency
 
                 if self.planet_name == None:
                     self.communication.send_ready()
@@ -67,6 +68,7 @@ class Robot:
                     print("Old dir: " + str(old_dir))
                     print("New dir: " + str(dir))
                     self.start_location = ((self.start_location[0][0], self.start_location[0][1]), dir)
+                    self.end_location = self.start_location
                     print("End location: " + str(self.start_location))
                     self.cs.select_new_path(old_dir,dir)
 
@@ -78,6 +80,7 @@ class Robot:
                     #communication (path-message)
 
                     send_dir = (old_dir + 180) % 360
+                    #TODO no answer from server
                     self.communication.send_path(self.start_location, ((x,y),send_dir), bottle_detected)
 
                     print("Old: " +  str(((x, y), old_dir)))
@@ -87,7 +90,6 @@ class Robot:
                     x = self.end_location[0][0]
                     y = self.end_location[0][1]
                     old_dir = (self.end_location[1] + 180) % 360
-                    self.end_location = None
 
                     dirs = self.cs.analyze(old_dir)
                     print("Dirs: " + str(dirs))
@@ -98,7 +100,9 @@ class Robot:
                     self.start_location = ((x, y), dir)
                     print("End location: " + str(self.start_location))
                     self.cs.select_new_path(old_dir, dir)
+                print("-------")
 
+                self.end_location = None
                 bottle_detected = False
             else:
                 self.motors.follow_line(0.5, self.cs, self.odometry)
@@ -150,12 +154,24 @@ class Robot:
 
         next_direction = input()
 
+        choice = Direction.NORTH
+
         #test
         if next_direction == "EAST":
-            return Direction.EAST
+            choice = Direction.EAST
         if next_direction == "SOUTH":
-            return Direction.SOUTH
+            choice =  Direction.SOUTH
         if next_direction == "WEST":
-            return Direction.WEST
-        return Direction.NORTH
+            choice =  Direction.WEST
+
+        self.communication.send_path_select(((self.end_location[0][0], self.end_location[0][1]),choice))
+        while self.path_choice == None:
+            pass
+
+        choice = self.path_choice
+        self.path_choice = None
+
+        return choice
+
+
 

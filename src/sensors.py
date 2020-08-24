@@ -48,8 +48,7 @@ class ColorSensor:
 
     #in progress
     def get_neighbour_nodes(self):
-        nodes = []
-        angles = [10,10,10,10] #better default values?
+        angles = []
 
         brightness = self.get_brightness()
 
@@ -58,22 +57,22 @@ class ColorSensor:
             if brightness < 200:
                 if angle > 315 or angle < 45:
                     if 0 not in angles:
-                        angles[0] = 0
+                        angles.append(0)
                 elif angle > 45 and angle < 135:
-                    if 90 not in angles:
-                        angles[1] = 90
+                    if 270 not in angles:
+                        angles.append(270)
                 elif angle > 135 and angle < 225:
                     if 180 not in angles:
-                        angles[2] = 180
+                        angles.append(180)
                 elif angle > 225 and angle < 315:
-                    if 270 not in angles:
-                        angles[3] = 270
+                    if 90 not in angles:
+                        angles.append(90)
                 #print("Winkel: " + str(angle))
             if angle >= 370:#360
                 break
             brightness = self.get_brightness()
             angle += 5
-            self.motors.turn_angle(100, 5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
+            self.motors.turn_angle(100, -5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
         return angles
 
         '''
@@ -146,47 +145,9 @@ class ColorSensor:
         dirs = []
 
         for angle in angles:
-            if angle != 10:
-                dirs.append((angle + old_dir)%360)
+           dirs.append((angle + old_dir)%360)
 
         return dirs
-
-        '''for angle in angles:
-            print("Winkel: " + str(angle))
-
-        if angles[0] != 10:
-            print("g für geradeaus")
-        if angles[1] != 10:
-            print("l für links")
-        if angles[2] != 10:
-            print("z für zurück")
-        if angles[3] != 10:
-            print("r für rechts")'''
-
-
-
-    '''def select_new_path(self, gamma_in_grad, old_dir, myOdometry):
-        next_direction = input()
-
-        next_angle = 0
-        if next_direction is "l":
-            next_angle = 90
-            gamma_in_grad += 90
-        if next_direction is "z":
-            next_angle = 180
-            gamma_in_grad += 180
-        if next_direction is "r":
-            next_angle = -90  # 270
-            gamma_in_grad -= 90  # +=270
-
-        print("Gamma in grad: " + str(gamma_in_grad))
-        dir = myOdometry.get_cardinal_point(gamma_in_grad, old_dir)
-
-        print("Blickrichtung: " + str(dir))
-
-        self.turn_to_angle(next_angle)
-
-        return dir'''
 
     def select_new_path(self, old_dir, new_dir):
         angle = new_dir - old_dir
