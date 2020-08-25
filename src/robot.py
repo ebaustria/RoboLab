@@ -64,13 +64,22 @@ class Robot:
                     print("Start location: " + str(self.start_location))
                     old_dir = self.start_location[1]
                     dirs = self.cs.analyze(old_dir)
+
+                    pos = (self.start_location[0][0], self.start_location[0][1])
+                    self.planet.scanned_nodes.append(pos)
+
                     print("Dirs: " + str(dirs))
                     # communication and path selection
 
                     #IMPORTANT!!!! (not a good solution now)
-                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]),  (old_dir + 180) % 360)
+                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]), (old_dir + 180) % 360)
 
                     dir = self.choose_dir(old_dir, dirs)
+                    explored = [(old_dir + 180) % 360, dir]
+                    for d in dirs:
+                        if d not in explored:
+                            self.planet.add_unexplored_edge(pos, d)
+
                     print("Old dir: " + str(old_dir))
                     print("New dir: " + str(dir))
                     self.start_location = ((self.start_location[0][0], self.start_location[0][1]), dir)
@@ -93,10 +102,35 @@ class Robot:
                     y = self.end_location[0][1]
                     old_dir = (self.end_location[1] + 180) % 360
 
-                    dirs = self.cs.analyze(old_dir)
+                    pos = (self.end_location[0][0], self.end_location[0][1])
+
+                    if pos in self.planet.scanned_nodes or len(self.planet.planet_dict[pos]) == 4:
+                        dirs = self.planet.unexplored_edges[pos].copy()
+                        print("Unexplored: " + str(dirs))
+                        for key in self.planet.planet_dict[pos].keys():
+                            print("Explored: " + str(key))
+                            if key not in dirs:
+                                dirs.append(key)
+                        # Sleep to wait for more messages
+                        time.sleep(2)
+                    else:
+                        dirs = self.cs.analyze(old_dir)
+                        self.planet.scanned_nodes.append(pos)
+
+                    if pos == self.planet.target:
+                        self.communication.send_target_reached("Wir sind die da!")
+                        while self.running:
+                            pass
+                        continue
+
                     print("Dirs: " + str(dirs))
-                    # communication and path selection
+
                     dir = self.choose_dir(old_dir, dirs)
+                    explored = [(old_dir + 180) % 360, dir]
+                    for d in dirs:
+                        if d not in explored:
+                            self.planet.add_unexplored_edge(pos, d)
+
                     print("Old dir: " + str(old_dir))
                     print("New dir: " + str(dir))
                     self.start_location = ((x, y), dir)
@@ -108,7 +142,6 @@ class Robot:
                 bottle_detected = False
                 self.odometry.reset_position()  # new ? necessary
             else:
-
                 ticks_previous_l, ticks_previous_r = self.motors.follow_line(0.5, self.cs, self.odometry, ticks_previous_l, ticks_previous_r) #new (better solution?) -> multiple times calles -> ticks_previous needed
                 counter = 0
             continue
@@ -167,6 +200,15 @@ class Robot:
                 choice = Direction.SOUTH
             if next_direction == "WEST":
                 choice = Direction.WEST
+        '''next_direction = input()
+
+        # test
+        if next_direction == "EAST":
+            choice = Direction.EAST
+        if next_direction == "SOUTH":
+            choice = Direction.SOUTH
+        if next_direction == "WEST":
+            choice = Direction.WEST'''
 
         self.communication.send_path_select(((self.end_location[0][0], self.end_location[0][1]),choice))
         #change start (25.08)

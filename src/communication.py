@@ -138,6 +138,7 @@ class Communication:
                 weight = -1
 
             self.robot.planet.add_path(start, end, weight)
+            # TODO remove unexplored egdes
             self.robot.end_location = end
         # pathSelect-Message
         elif payload_type == "pathSelect":
@@ -190,6 +191,7 @@ class Communication:
                 weight = -1
 
             self.robot.planet.add_path(start, end, weight)
+            # TODO remove unexplored egdes
         # target-Message
         elif payload_type == "target":
             """
@@ -225,8 +227,6 @@ class Communication:
             self.logger.debug(msg)
 
             self.robot.running = False
-        else:
-            raise Exception("Invalid Messagetype")
 
         self.robot.last_packet = time()
 
@@ -347,7 +347,7 @@ class Communication:
         Sends to the mothership the targetReached-Message 
         Used when target is reached
 
-        publish to planet/<PLANET>/117
+        publish to explorer/117
         {
             "from": "client",
             "type": "targetReached",
@@ -365,14 +365,14 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % self.robot.planet_name, payload)
+        self.send_message("explorer/117", payload)
         
     def send_exploration_completed(self, msg: str):
         """
         Sends to the mothership the explorationCompleted-Message 
         Used when planet is completely explored
 
-        publish to planet/<PLANET>/117
+        publish to explorer/117
         {
             "from": "client",
             "type": "explorationCompleted",
@@ -390,7 +390,7 @@ class Communication:
             }
         }
 
-        self.send_message("planet/%s/117" % self.robot.planet_name, payload)
+        self.send_message("explorer/117", payload)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
