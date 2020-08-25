@@ -41,15 +41,15 @@ class Robot:
 
         while self.running:
             if self.us.get_distance() < 15:
-                self.cs.rotate_to_path(180)  # turn until next path
-                print("Bottle detected")
+                self.cs.rotate_to_path(180)
+                # print("Bottle detected")
                 bottle_detected = True
                 continue
 
             if (self.cs.get_node() == "blue" or self.cs.get_node() == "red") and counter == 0:
                 counter += 1
 
-                self.motors.drive_in_center_of_node(100, 2, self.odometry)  # speed = 50, time = 3 -> change for efficiency
+                self.motors.drive_in_center_of_node(100, 2, self.odometry)
 
                 if self.planet_name is None:
                     self.communication.send_ready()
@@ -59,7 +59,7 @@ class Robot:
 
                     self.odometry.reset_list()
                     forward_dir = self.start_location[1]
-                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]), (forward_dir + 180) % 360)
+                    self.end_location = (self.start_location[0], (forward_dir + 180) % 360)
                 else:
                     x, y, forward_dir = self.odometry.calculate_path(
                         self.start_location[1], bottle_detected, self.start_location[0][0], self.start_location[0][1])
@@ -70,7 +70,7 @@ class Robot:
                     while self.end_location is None:
                         pass
 
-                current_pos = (self.end_location[0][0], self.end_location[0][1])
+                current_pos = self.end_location[0]
                 forward_dir = (self.end_location[1] + 180) % 360
 
                 if current_pos in self.planet.scanned_nodes:
@@ -78,7 +78,7 @@ class Robot:
                 else:
                     possible_dirs = self.cs.analyze(forward_dir)
                     for d in possible_dirs:
-                        if not self.planet.planet_dict[current_pos] or d not in self.planet.planet_dict[current_pos].keys():
+                        if current_pos not in self.planet.planet_dict or d not in self.planet.planet_dict[current_pos].keys():
                             self.planet.add_unexplored_edge(current_pos, d)
                     self.planet.scanned_nodes.append(current_pos)
 
@@ -95,7 +95,7 @@ class Robot:
                         pass
                     continue
 
-                self.start_location = ((self.end_location[0][0], self.end_location[0][1]), next_dir)
+                self.start_location = (self.end_location[0], next_dir)
                 self.cs.select_new_path(forward_dir, next_dir)
 
                 self.end_location = None

@@ -121,18 +121,18 @@ class Odometry:
     def calculate_path(self, old_dir, bottle_detected, x, y):
         if bottle_detected:
             self.reset_list()
-            print("Bottle on path")
+            # print("Bottle on path")
             return x, y, (old_dir+180)%360
 
         dif_x, dif_y, gamma, length = self.calculate_values()#length not needed
         gamma_in_grad = gamma * 360 / (2 * math.pi)
 
-        print("Length of List: " + str(len(self.get_tupel_list())))
+        # print("Length of List: " + str(len(self.get_tupel_list())))
 
-        print("New gamma: " + str(gamma_in_grad))  # remove prints
-        print("Path length: " + str(length))
-        print("Moved in x-direction: " + str(dif_x))
-        print("Moved in y-direction: " + str(dif_y))
+        # print("New gamma: " + str(gamma_in_grad))  # remove prints
+        # print("Path length: " + str(length))
+        # print("Moved in x-direction: " + str(dif_x))
+        # print("Moved in y-direction: " + str(dif_y))
 
         self.reset_list()
 
@@ -154,8 +154,8 @@ class Odometry:
             y -= round(dif_x / unit)  # check
 
 
-        print("X-Koordinate: " + str(x) + " Y-Koordinate: " + str(y))
-        print("Blickrichtung: " + str(dir))
+        # print("X-Koordinate: " + str(x) + " Y-Koordinate: " + str(y))
+        # print("Blickrichtung: " + str(dir))
 
         return x, y, dir
 

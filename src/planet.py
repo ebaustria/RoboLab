@@ -163,17 +163,17 @@ class Planet:
         shortest_path = []
 
         if start == target:
-            print("Target reached.")
+            # print("Target reached.")
             return shortest_path
 
         # If the target node is not in the planet dictionary, then it cannot be found/reached. Return None.
         if target not in self.planet_dict.keys():
-            print("Target is unexplored.")
+            # print("Target is unexplored.")
             return None
 
         # If no path exists between the start node and the target, return None.
         if not self.path_exists(start, target):
-            print("Target is unreachable.")
+            # print("Target is unreachable.")
             return None
 
         # All nodes are marked unvisited. The start node is given the tentative distance of 0, and the other nodes are
@@ -217,7 +217,7 @@ class Planet:
         if target in precursor_compass_dict.keys():
             shortest_path.append(precursor_compass_dict[target])
         else:
-            print("Target is unreachable.")
+            # print("Target is unreachable.")
             return None
 
         # Iterate over the shortest path until the start node is reached. On every iteration, add the respective node's
@@ -229,7 +229,7 @@ class Planet:
 
         shortest_path.reverse()
 
-        print("Target is reachable.")
+        # print("Target is reachable.")
         return shortest_path
 
     # Helper function for determining whether a given target node can be reached from a given start node. Intended to

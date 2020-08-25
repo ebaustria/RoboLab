@@ -124,11 +124,10 @@ class ColorSensor:
 
     #done
     def initialize_color(self, color):
-
-        print("1. Initialization " +  color)
+        print("1. Initialization " + color)
         self.button_pressed()
 
-        r1,g1,b1 = self.cs.bin_data("hhh")
+        r1, g1, b1 = self.cs.bin_data("hhh")
         print("red: " + str(r1) + " green: " + str(g1) + " blue: " + str(b1))
         return r1, g1, b1
 
@@ -162,7 +161,7 @@ class ColorSensor:
 
     def analyze(self, old_dir):
         angles = self.get_neighbour_nodes()
-        print("Angles: " + str(angles))
+        # print("Angles: " + str(angles))
         dirs = []
 
         for angle in angles:
@@ -175,7 +174,7 @@ class ColorSensor:
         if angle > 180:
             angle -= 360
 
-        print("Angle in select_new_path: " + str(angle))
+        # print("Angle in select_new_path: " + str(angle))
         self.rotate_to_path(angle)
 
 
