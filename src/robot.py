@@ -60,6 +60,7 @@ class Robot:
                     self.odometry.reset_list()
                     forward_dir = self.start_location[1]
                     self.end_location = (self.start_location[0], (forward_dir + 180) % 360)
+                    self.planet.add_path(self.end_location, self.end_location, -1)
                 else:
                     x, y, forward_dir = self.odometry.calculate_path(
                         self.start_location[1], bottle_detected, self.start_location[0][0], self.start_location[0][1])
@@ -120,13 +121,16 @@ class Robot:
             distance = math.inf
             nearest = None
 
+            print("Unexplored: " + str(self.planet.unexplored_edges))
             for node in self.planet.unexplored_edges.keys():
                 incomplete_nodes.append(node)
 
+            print("Nodes: " + str(self.planet.get_nodes()))
             for node in self.planet.get_nodes():
                 if node not in self.planet.scanned_nodes:
                     incomplete_nodes.append(node)
 
+            print("Incomplete: " + str(incomplete_nodes))
             if len(incomplete_nodes) == 0:
                 return -1
 

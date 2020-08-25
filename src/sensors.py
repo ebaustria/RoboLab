@@ -124,7 +124,7 @@ class ColorSensor:
 
     #done
     def initialize_color(self, color):
-        print("1. Initialization " + color)
+        print("Initialization " + color)
         self.button_pressed()
 
         r1, g1, b1 = self.cs.bin_data("hhh")

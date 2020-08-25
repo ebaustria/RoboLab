@@ -4,10 +4,9 @@
 import json
 import platform
 import ssl
-from time import time
 from typing import Tuple
 
-from planet import Path, Direction
+from planet import Direction
 
 # Fix: SSL certificate problem on macOS
 if all(platform.mac_ver()):
@@ -39,7 +38,7 @@ class Communication:
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
 
         # Main channel
-        self.client.subscribe('explorer/117', qos=1)
+        self.client.subscribe('explorer/117', qos=2)
 
         self.logger = logger
 
@@ -99,7 +98,7 @@ class Communication:
             self.robot.planet_name = payload["payload"]["planetName"]
 
             # Subscribe to planet channel
-            self.client.subscribe('planet/%s/117' % self.robot.planet_name, qos=1)
+            self.client.subscribe('planet/%s/117' % self.robot.planet_name, qos=2)
         # path-Message
         elif payload_type == "path":
             """
