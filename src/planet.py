@@ -128,6 +128,21 @@ class Planet:
 
         self.unexplored_edges[node].append(direction)
 
+    def remove_unexplored_edge(self, start: Tuple[Tuple[int, int], Direction], end: Tuple[Tuple[int, int], Direction])\
+            -> None:
+
+        if start not in self.unexplored_edges and end not in self.unexplored_edges:
+            return
+
+        start_dir = start[1]
+        end_dir = end[1]
+
+        if start_dir in self.unexplored_edges[start]:
+            self.unexplored_edges[start].pop(start_dir)
+
+        if end_dir in self.unexplored_edges[end]:
+            self.unexplored_edges[end].pop(end_dir)
+
     # Implementation of Dijkstra's algorithm.
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int],
                                                                                                        Direction]]]:
