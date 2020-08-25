@@ -138,6 +138,7 @@ class Communication:
                 weight = -1
 
             self.robot.planet.add_path(start, end, weight)
+            self.robot.planet.remove_unexplored_edge(start, end)
             self.robot.end_location = end
         # pathSelect-Message
         elif payload_type == "pathSelect":
@@ -190,6 +191,8 @@ class Communication:
                 weight = -1
 
             self.robot.planet.add_path(start, end, weight)
+            # TODO I don't think this function call is necessary but Marc should take a look at it
+            self.robot.planet.remove_unexplored_edge(start, end)
         # target-Message
         elif payload_type == "target":
             """
