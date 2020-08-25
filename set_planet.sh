@@ -1,1 +1,1 @@
-mosquitto_pub -h mothership.inf.tu-dresden.de -p 1883 -u "117" -P "0QOfuyjhr0" -t "explorer/117" -m '{"from":"client","type":"testplanet","payload":{"planetName":"Nailik"}}' -q 1
+mosquitto_pub -h mothership.inf.tu-dresden.de -p 1883 -u "117" -P "0QOfuyjhr0" -t "explorer/117" -m '{"from":"client","type":"testplanet","payload":{"planetName":"Piech"}}' -q 1
