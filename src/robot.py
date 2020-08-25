@@ -20,7 +20,6 @@ class Robot:
         self.communication = Communication(mqtt_client, logger, self)
         self.motors = Motors()
 
-        # TODO think about whether or not we want to pass the robot to the sensors as a parameter
         self.cs = ColorSensor(self.motors)
         self.us = Ultrasonic()
         self.start_location = None
@@ -121,16 +120,13 @@ class Robot:
             distance = math.inf
             nearest = None
 
-            print("Unexplored: " + str(self.planet.unexplored_edges))
             for node in self.planet.unexplored_edges.keys():
                 incomplete_nodes.append(node)
 
-            print("Nodes: " + str(self.planet.get_nodes()))
             for node in self.planet.get_nodes():
                 if node not in self.planet.scanned_nodes:
                     incomplete_nodes.append(node)
 
-            print("Incomplete: " + str(incomplete_nodes))
             if len(incomplete_nodes) == 0:
                 return -1
 

@@ -86,6 +86,12 @@ class Planet:
         self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
                                                                      path_to_add.weight)
 
+        if len(self.planet_dict[path_to_add.start]) == 4 and path_to_add.start not in self.scanned_nodes:
+            self.scanned_nodes.append(path_to_add.start)
+
+        if len(self.planet_dict[path_to_add.target]) == 4 and path_to_add.target not in self.scanned_nodes:
+            self.scanned_nodes.append(path_to_add.target)
+
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
         Returns all paths
