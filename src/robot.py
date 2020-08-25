@@ -45,7 +45,7 @@ class Robot:
 
         while self.running:
             # TODO begin following line until first node is reached, send and receive data
-            if self.us.get_distance() < 10:
+            if self.us.get_distance() < 15:
                 self.cs.rotate_to_path(180)  # turn until next path
                 print("Bottle detected")
                 bottle_detected = True
@@ -68,22 +68,19 @@ class Robot:
                     # communication and path selection
 
                     #IMPORTANT!!!! (not a good solution now)
-                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]), None)
+                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]),  (old_dir + 180) % 360)
 
                     dir = self.choose_dir(old_dir, dirs)
                     print("Old dir: " + str(old_dir))
                     print("New dir: " + str(dir))
                     self.start_location = ((self.start_location[0][0], self.start_location[0][1]), dir)
-                    self.end_location = self.start_location
                     print("End location: " + str(self.start_location))
                     self.cs.select_new_path(old_dir,dir)
 
                 else:
                     x, y, old_dir = self.odometry.calculate_path(
                         self.start_location[1], bottle_detected, self.start_location[0][0], self.start_location[0][1])
-                    #not analyze if node known
                     print("Start location: " + str(self.start_location))
-                    #communication (path-message)
 
                     send_dir = (old_dir + 180) % 360
                     self.communication.send_path(self.start_location, ((x,y),send_dir), bottle_detected)
@@ -153,31 +150,30 @@ class Robot:
     def choose_dir(self, old_dir, dirs):
         print("Choose dir: ")
 
-        if len(dirs) == 2:
-            if dirs[0] == (old_dir + 180) % 360:
-                return dirs[1]
-            else:
-                return dirs[0]
-
-        next_direction = input()
-
         choice = Direction.NORTH
 
-        #test
-        if next_direction == "EAST":
-            choice = Direction.EAST
-        if next_direction == "SOUTH":
-            choice = Direction.SOUTH
-        if next_direction == "WEST":
-            choice = Direction.WEST
+        if len(dirs) == 2:
+            if dirs[0] == (old_dir + 180) % 360:
+                choice = dirs[1]
+            else:
+                choice =  dirs[0]
+        else:
+            next_direction = input()
 
+            #test
+            if next_direction == "EAST":
+                choice = Direction.EAST
+            if next_direction == "SOUTH":
+                choice = Direction.SOUTH
+            if next_direction == "WEST":
+                choice = Direction.WEST
 
         self.communication.send_path_select(((self.end_location[0][0], self.end_location[0][1]),choice))
         #change start (25.08)
         is_communication_cycle_over = False
         start_time = time.time()
 
-        while self.path_choice == None and is_communication_cycle_over == False:
+        while self.path_choice == None and not is_communication_cycle_over:
             if time.time() - start_time >= 3.0:
                 is_communication_cycle_over = True
 
