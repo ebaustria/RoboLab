@@ -148,8 +148,9 @@ class ColorSensor:
 
     #in progress
     def rotate_to_path(self, angle):
-        #exchange "turn_angle" with "turn_until_angle_found"
-        self.motors.turn_angle(100, angle+30)#speed = 100, angle = angle+30-> less time?
+        if angle > 180:
+            angle = angle - 360
+        self.motors.turn_angle(100, angle+30)
         brightness = self.get_brightness()
 
         while brightness > 200:

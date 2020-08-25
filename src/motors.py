@@ -93,17 +93,25 @@ class Motors:
             r, g, b = myColorSensor.get_colors()
             brightness = math.sqrt(r**2 + g**2 + b**2)
 
-            multiplicator_p = 0.3#???
-            #multiplicator_d = 0.05#???
+
+
+            multiplicator_p = 0.4#???
+            multiplicator_d = 0.08#???
             error_p = brightness - 350
             error_d = brightness - previous_brightness
-            turn = multiplicator_p*error_p #+ multiplicator_d*error_d#(change y)/(change x)*error
+            turn = multiplicator_p*error_p + multiplicator_d*error_d#(change y)/(change x)*error
 
+            #maybe I-Controller instead
+            '''if error_d > 250:
+                offset = 50
+            elif 100 < error_d <= 250:
+                offset = 100
+            else:
+                offset = 200'''
+            offset = 200
 
-
-
-            right_speed = 200 + turn
-            left_speed = 200 - turn
+            right_speed = offset + turn
+            left_speed = offset - turn
             self.rm.speed_sp = right_speed
             self.lm.speed_sp = left_speed
             self.rm.command = "run-forever"
@@ -175,7 +183,10 @@ class Motors:
     #done
     def drive_in_center_of_node(self, speed, duration, odometry):
         self.stop()
+        previous_ticks_l, previous_ticks_r = odometry.get_position()
         self.drive_forward(speed, duration)
+        ticks_l, ticks_r = odometry.get_position()
+        odometry.add_point((ticks_l-previous_ticks_l, ticks_r-previous_ticks_r))
         self.stop()
 
     #done

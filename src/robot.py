@@ -78,7 +78,7 @@ class Robot:
                 else:
                     possible_dirs = self.cs.analyze(forward_dir)
                     for d in possible_dirs:
-                        if d not in self.planet.planet_dict[current_pos].keys():
+                        if not self.planet.planet_dict[current_pos] or d not in self.planet.planet_dict[current_pos].keys():
                             self.planet.add_unexplored_edge(current_pos, d)
                     self.planet.scanned_nodes.append(current_pos)
 
@@ -154,6 +154,3 @@ class Robot:
         self.path_choice = None
 
         return choice
-
-
-
