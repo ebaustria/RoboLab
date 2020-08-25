@@ -49,7 +49,8 @@ class Planet:
         """ Initializes the data structure """
         self.target = None
         self.planet_dict = {}
-        self.blocked_paths = []
+        self.scanned_nodes = []
+        self.unexplored_edges = {}
 
     # If the start point of the path to add is not in the planet dictionary, an entry is created for it. The key is the
     # start point, and the value is a dictionary. The start direction is added to the inner dictionary as a key. A tuple
@@ -73,20 +74,17 @@ class Planet:
 
         path_to_add = Path(start[0], target[0], weight, start[1], target[1])
 
-        if path_to_add.start not in self.planet_dict:
+        if path_to_add.start not in self.planet_dict and path_to_add.start is not None:
             self.planet_dict[path_to_add.start] = {}
-            self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
-                                                                          path_to_add.weight)
-        else:
-            self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
-                                                                          path_to_add.weight)
+
         if path_to_add.target not in self.planet_dict and path_to_add.target is not None:
             self.planet_dict[path_to_add.target] = {}
-            self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
-                                                                         path_to_add.weight)
-        else:
-            self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
-                                                                         path_to_add.weight)
+
+        self.planet_dict[path_to_add.start][path_to_add.start_dir] = (path_to_add.target, path_to_add.end_dir,
+                                                                      path_to_add.weight)
+
+        self.planet_dict[path_to_add.target][path_to_add.end_dir] = (path_to_add.start, path_to_add.start_dir,
+                                                                     path_to_add.weight)
 
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
@@ -109,6 +107,26 @@ class Planet:
         """
 
         return self.planet_dict
+
+    def get_nodes(self) -> List[Tuple[int, int]]:
+        nodes = []
+
+        for node in self.planet_dict.keys():
+            nodes.append(node)
+
+        return nodes
+
+    def shortest_next_dir(self, start: Tuple[int, int], target: Tuple[int, int]) -> Direction:
+        shortest_path = self.shortest_path(start, target)
+
+        return shortest_path[0][1]
+
+    def add_unexplored_edge(self, node: Tuple[int, int], direction: Direction) -> None:
+
+        if node not in self.unexplored_edges:
+            self.unexplored_edges[node] = []
+
+        self.unexplored_edges[node].append(direction)
 
     # Implementation of Dijkstra's algorithm.
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int],
@@ -138,6 +156,11 @@ class Planet:
             print("Target is unexplored.")
             return None
 
+        # If no path exists between the start node and the target, return None.
+        if not self.path_exists(start, target):
+            print("Target is unreachable.")
+            return None
+
         # All nodes are marked unvisited. The start node is given the tentative distance of 0, and the other nodes are
         # given the tentative distance of infinity.
         for node in self.planet_dict.keys():
@@ -145,11 +168,6 @@ class Planet:
                 unvisited[node] = 0
             else:
                 unvisited[node] = math.inf
-
-        # If no path exists between the start node and the target, return None.
-        if not self.path_exists(start, target):
-            print("Target is unreachable.")
-            return None
 
         # As long as the target has not been visited, iterate over the neighbors of the current node. If the neighbor is
         # unvisited and the weight of the edge that connects it to the current node is not -1 (i.e. the path is not
