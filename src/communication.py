@@ -58,6 +58,7 @@ class Communication:
         :param message: Object
         :return: void
         """
+        print("Received message",message.payload)
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
 

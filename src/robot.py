@@ -96,7 +96,9 @@ class Robot:
 
                     print("Old: " +  str(((x, y), old_dir)))
 
+
                     while self.end_location == None:
+                        #print(str(self.end_location))
                         pass
                     x = self.end_location[0][0]
                     y = self.end_location[0][1]
@@ -105,7 +107,7 @@ class Robot:
                     pos = (self.end_location[0][0], self.end_location[0][1])
 
                     if pos in self.planet.scanned_nodes or len(self.planet.planet_dict[pos]) == 4:
-                        dirs = self.planet.unexplored_edges[pos].copy()
+                        dirs = self.planet.unexplored_edges[pos].copy()#error bei Examinator-A-1337r
                         print("Unexplored: " + str(dirs))
                         for key in self.planet.planet_dict[pos].keys():
                             print("Explored: " + str(key))
