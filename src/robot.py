@@ -20,8 +20,6 @@ class Robot:
         self.communication = Communication(mqtt_client, logger, self)
         self.motors = Motors()
 
-        self.last_packet = 0
-
         # TODO think about whether or not we want to pass the robot to the sensors as a parameter
         self.cs = ColorSensor(self.motors)
         self.us = Ultrasonic()
@@ -29,7 +27,6 @@ class Robot:
         self.end_location = None
         self.path_choice = None
         self.running = True
-        self.explore_mode = True
 
     def run(self):
         counter = 0
@@ -126,6 +123,9 @@ class Robot:
                     print("Dirs: " + str(dirs))
 
                     dir = self.choose_dir(old_dir, dirs)
+                    if dir == -1:
+                        continue
+                    
                     explored = [(old_dir + 180) % 360, dir]
                     for d in dirs:
                         if d not in explored:
@@ -146,41 +146,43 @@ class Robot:
                 counter = 0
             continue
 
-            if self.planet.target is None:
-                self.explore_mode = True
-
-            # TODO Calc Path, check if target reached, scan, select new path
-
-            if self.explore_mode:
-                # TODO what exactly does the robot need to do in explore mode and in what order?
-                # Where do variables (like self.planet.target) need to be changed? Where do we need to add a "pass"after
-                # changing variables?
-
-                # This should probably happen at the end of the robot's Aufenthalt at a node.
-                if self.planet.target is not None:
-                    # TODO Change location to end location
-                    shortest = self.planet.shortest_path(self.start_location, self.planet.target)
-
-                    if not shortest:
-                        # TODO send_target_reached
-                        self.planet.target = None
-                    elif shortest is not None:
-                        self.explore_mode = False
-                        # TODO do something with the shortest path
-            else:
-                # TODO Change location to end location
-                shortest = self.planet.shortest_path(self.start_location, self.planet.target)
-
-                if shortest is None:
-                    self.explore_mode = True
-                elif not shortest:
-                    # TODO send_target_reached
-                    self.planet.target = None
-                else:
-                    # TODO do something with the shortest path
-                    pass
-    #TODO
     def choose_dir(self, old_dir, dirs):
+        choice = -1
+
+        if self.planet.target is not None:
+
+            shortest = self.planet.shortest_path(self.end_location[0], self.planet.target)
+
+            if shortest is not None:
+                choice = self.planet.shortest_next_dir(self.end_location[0], self.planet.target)
+
+        if choice == -1:
+            incomplete_nodes = []
+            distance = math.inf
+            nearest = None
+
+            for node in self.planet.unexplored_edges.keys():
+                incomplete_nodes.append(node)
+
+            for node in self.planet.get_nodes():
+                if node not in self.planet.scanned_nodes:
+                    incomplete_nodes.append(node)
+
+            if len(incomplete_nodes) == 0:
+                self.communication.send_exploration_completed("Wir haben alles entdeckt!")
+                while self.running:
+                    pass
+                return -1
+
+            for node in incomplete_nodes:
+                cur = self.planet.shortest_distance(self.end_location[0], node)
+                if cur < distance:
+                    distance = cur
+                    nearest = node
+
+            choice = self.planet.shortest_next_dir(self.end_location[0], nearest)
+
+        """
         print("Choose dir: ")
 
         choice = Direction.NORTH
@@ -200,17 +202,9 @@ class Robot:
                 choice = Direction.SOUTH
             if next_direction == "WEST":
                 choice = Direction.WEST
-        '''next_direction = input()
+        """
 
-        # test
-        if next_direction == "EAST":
-            choice = Direction.EAST
-        if next_direction == "SOUTH":
-            choice = Direction.SOUTH
-        if next_direction == "WEST":
-            choice = Direction.WEST'''
-
-        self.communication.send_path_select(((self.end_location[0][0], self.end_location[0][1]),choice))
+        self.communication.send_path_select(((self.end_location[0][0], self.end_location[0][1]), choice))
         #change start (25.08)
         is_communication_cycle_over = False
         start_time = time.time()

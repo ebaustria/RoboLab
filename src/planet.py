@@ -256,3 +256,15 @@ class Planet:
                     to_check.append(path[0])
 
         return False
+
+    def shortest_distance(self, start: Tuple[int, int], target: Tuple[int, int]):
+        shortest = self.shortest_path(start, target)
+
+        if shortest is None:
+            return math.inf
+
+        weight = 0
+        for (pos, dir) in shortest:
+            weight += self.planet_dict[pos][dir][2]
+
+        return weight

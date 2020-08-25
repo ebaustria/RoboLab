@@ -228,8 +228,6 @@ class Communication:
 
             self.robot.running = False
 
-        self.robot.last_packet = time()
-
     def send_planet_name(self, name: str):
         """
         Sends to the mothership the testplanet-Message
