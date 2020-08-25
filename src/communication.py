@@ -72,24 +72,8 @@ class Communication:
         # Get type of payload
         payload_type = payload["type"]
 
-        # debug/error messages e.g. testplanet-Message
-        if payload_type in ["notice", "error", "adjust"]:
-            """
-            Contains some helpful information
-            {
-                "from": "debug",
-                "type": "notice",
-                "payload": {
-                    "message": "active planet: <PLANET_NAME>"
-                }
-            }
-            """
-
-            # Read and print message
-            #msg = payload["payload"]["message"]
-            #self.logger.debug(msg)
         # ready-Message
-        elif payload_type == "planet":
+        if payload_type == "planet":
             """
             Contains information about the planet name
             and the start position and orientation
@@ -155,8 +139,6 @@ class Communication:
 
             self.robot.planet.add_path(start, end, weight)
             self.robot.end_location = end
-
-            pass
         # pathSelect-Message
         elif payload_type == "pathSelect":
             """
@@ -171,8 +153,6 @@ class Communication:
             """
 
             self.robot.path_choice = payload["payload"]["startDirection"]
-
-            pass
         # pathUnveiled-Message
         elif payload_type == "pathUnveiled":
             """
@@ -210,8 +190,6 @@ class Communication:
                 weight = -1
 
             self.robot.planet.add_path(start, end, weight)
-
-            pass
         # target-Message
         elif payload_type == "target":
             """
@@ -228,12 +206,8 @@ class Communication:
 
             target_x = payload["payload"]["targetX"]
             target_y = payload["payload"]["targetY"]
-            
-            target = (target_x, target_y)
-            
-            self.robot.planet.target = target
 
-            pass
+            self.robot.planet.target = (target_x, target_y)
         # done-Message
         elif payload_type == "done":
             """
@@ -251,7 +225,6 @@ class Communication:
             self.logger.debug(msg)
 
             self.robot.running = False
-            pass
         else:
             raise Exception("Invalid Messagetype")
 
@@ -339,7 +312,7 @@ class Communication:
 
         self.send_message("planet/%s/117" % self.robot.planet_name, payload)
         
-    #def send_path_select(self, choice: object) -> object:
+
     def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
         """
         Sends to the mothership the pathSelect-Message 
