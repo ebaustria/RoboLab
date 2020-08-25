@@ -46,8 +46,8 @@ class ColorSensor:
         r, g, b = self.cs.bin_data("hhh")
         return r, g, b
 
-    #in progress
-    def get_neighbour_nodes(self):
+    #in progress -> tried to exchange with new (25.08 2:26)
+    '''def get_neighbour_nodes(self):
         angles = []
 
         brightness = self.get_brightness()
@@ -73,6 +73,25 @@ class ColorSensor:
             brightness = self.get_brightness()
             angle += 5
             self.motors.turn_angle(100, -5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
+        return angles'''
+
+    def get_neighbour_nodes(self):#new try (25.08 2:32)
+        angles = []
+        nodes = self.motors.detect_nodes(100, self)
+        for node in nodes:
+            if node > 315 or node < 45:
+                if 0 not in angles:
+                    angles.append(0)
+            elif node > 45 and node < 135:
+                if 270 not in angles:
+                    angles.append(270)
+            elif node > 135 and node < 225:
+                if 180 not in angles:
+                    angles.append(180)
+            elif node > 225 and node < 315:
+                if 90 not in angles:
+                    angles.append(90)
+            # print("Winkel: " + str(angle))
         return angles
 
         '''
@@ -129,11 +148,12 @@ class ColorSensor:
 
     #in progress
     def rotate_to_path(self, angle):
-        self.motors.turn_angle(100, angle+30, 5)#speed = 100, angle = angle-45, time = 5-> less time?
+        #exchange "turn_angle" with "turn_until_angle_found"
+        self.motors.turn_angle(100, angle+30)#speed = 100, angle = angle+30-> less time?
         brightness = self.get_brightness()
 
         while brightness > 200:
-            self.motors.turn_angle(100, -5, 0.2)#speed = 100, angle = 5, time = 0.2 -> less time?
+            self.motors.turn_until_path_found(100, self)
             brightness = self.get_brightness()
 
         self.motors.stop()

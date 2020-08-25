@@ -5,6 +5,7 @@ from motors import Motors
 from sensors import ColorSensor, Ultrasonic
 import ev3dev.ev3 as ev3
 import math
+import time
 
 
 class Robot:
@@ -33,7 +34,8 @@ class Robot:
     def run(self):
         counter = 0
         bottle_detected = False
-
+        ticks_previous_l = 0
+        ticks_previous_r = 0
 
         self.cs.calibrate_colors()
 
@@ -52,7 +54,7 @@ class Robot:
             if (self.cs.get_node() == "blue" or self.cs.get_node() == "red") and counter == 0:
                 counter += 1
 
-                self.motors.drive_in_center_of_node(50, 3.5, self.odometry)  # speed = 50, time = 3 -> change for efficiency
+                self.motors.drive_in_center_of_node(100, 2, self.odometry)  # speed = 50, time = 3 -> change for efficiency
 
                 if self.planet_name == None:
                     self.communication.send_ready()
@@ -64,6 +66,10 @@ class Robot:
                     dirs = self.cs.analyze(old_dir)
                     print("Dirs: " + str(dirs))
                     # communication and path selection
+
+                    #IMPORTANT!!!! (not a good solution now)
+                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]), None)
+
                     dir = self.choose_dir(old_dir, dirs)
                     print("Old dir: " + str(old_dir))
                     print("New dir: " + str(dir))
@@ -80,7 +86,6 @@ class Robot:
                     #communication (path-message)
 
                     send_dir = (old_dir + 180) % 360
-                    #TODO no answer from server
                     self.communication.send_path(self.start_location, ((x,y),send_dir), bottle_detected)
 
                     print("Old: " +  str(((x, y), old_dir)))
@@ -104,8 +109,10 @@ class Robot:
 
                 self.end_location = None
                 bottle_detected = False
+                self.odometry.reset_position()  # new ? necessary
             else:
-                self.motors.follow_line(0.5, self.cs, self.odometry)
+
+                ticks_previous_l, ticks_previous_r = self.motors.follow_line(0.5, self.cs, self.odometry, ticks_previous_l, ticks_previous_r) #new (better solution?) -> multiple times calles -> ticks_previous needed
                 counter = 0
             continue
 
@@ -160,15 +167,23 @@ class Robot:
         if next_direction == "EAST":
             choice = Direction.EAST
         if next_direction == "SOUTH":
-            choice =  Direction.SOUTH
+            choice = Direction.SOUTH
         if next_direction == "WEST":
-            choice =  Direction.WEST
+            choice = Direction.WEST
+
 
         self.communication.send_path_select(((self.end_location[0][0], self.end_location[0][1]),choice))
-        while self.path_choice == None:
-            pass
+        #change start (25.08)
+        is_communication_cycle_over = False
+        start_time = time.time()
 
-        choice = self.path_choice
+        while self.path_choice == None and is_communication_cycle_over == False:
+            if time.time() - start_time >= 3.0:
+                is_communication_cycle_over = True
+
+        if self.path_choice != None:
+            choice = self.path_choice
+        # change end
         self.path_choice = None
 
         return choice

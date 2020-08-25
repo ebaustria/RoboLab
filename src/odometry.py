@@ -127,6 +127,8 @@ class Odometry:
         dif_x, dif_y, gamma, length = self.calculate_values()#length not needed
         gamma_in_grad = gamma * 360 / (2 * math.pi)
 
+        print("Length of List: " + str(len(self.get_tupel_list())))
+
         print("New gamma: " + str(gamma_in_grad))  # remove prints
         print("Path length: " + str(length))
         print("Moved in x-direction: " + str(dif_x))

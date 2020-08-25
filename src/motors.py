@@ -2,6 +2,8 @@ import ev3dev.ev3 as ev3
 import time
 import math
 
+from odometry import Odometry #new
+
 class Motors:
     def __init__(self):
         self.rm = ev3.LargeMotor("outB")
@@ -75,58 +77,48 @@ class Motors:
         '''
 
     #in progress (PID-Controller)
-    def follow_line(self, duration, myColorSensor, myOdometry): #myOdometry new
+    def follow_line(self, duration, myColorSensor, myOdometry, ticks_previous_l, ticks_previous_r): #myOdometry new
         r, g, b = myColorSensor.get_colors()
         previous_brightness = math.sqrt(r**2 + g**2 + b**2) # for D-Controller
         right_speed = 0
         left_speed = 0
-        multiplier = 1 # for D-Controller
+
+
+
 
         for i in range(0, int(duration*10)):
             #Odometry: coordinates(ticks) to default 0
-            myOdometry.reset_position()
+            #myOdometry.reset_position()
 
             r, g, b = myColorSensor.get_colors()
             brightness = math.sqrt(r**2 + g**2 + b**2)
 
-            #original speed
-            #right_speed = multiplier*(50 + 50*brightness/250)
-            #left_speed = multiplier*(50 + 50*250/brightness) #break condition (for low brightness value too high
+            multiplicator_p = 0.3#???
+            #multiplicator_d = 0.05#???
+            error_p = brightness - 350
+            error_d = brightness - previous_brightness
+            turn = multiplicator_p*error_p #+ multiplicator_d*error_d#(change y)/(change x)*error
 
-            #linear speed
-            #right_speed = 150 - 100 * (1 - (brightness / 350))
-            #left_speed = 150 + 100 * (1 - (brightness / 350)) 75/dif
 
-            #another linear speed with multiplier
-            #right_speed = multiplier * (150 - 100 * (1 - (brightness / 350)))
-            #left_speed = multiplier * (150 + 100 * (1 - (brightness / 350)))
 
-            #print("right speed: " + str(right_speed))
-            #print("left speed: " + str(left_speed))
 
-            #PD-Line-Follower (newest try)
-            error = brightness - 350
-            turn = 30/70*error#(change y)/(change x)*error
-
-            correction = 0.7
-            #multiplier = (brightness - previous_brightness)*correction #negative if darker
-            multiplier = 0 #just for test
-            #print("Multiplier: " + str(multiplier))
-
-            right_speed = 200 + turn - multiplier
-            left_speed = 200 - turn + multiplier
-
+            right_speed = 200 + turn
+            left_speed = 200 - turn
             self.rm.speed_sp = right_speed
             self.lm.speed_sp = left_speed
-            self.rm.command = "run-forever" #other mode?
+            self.rm.command = "run-forever"
             self.lm.command = "run-forever"
 
             time.sleep(duration/10)
 
             previous_brightness = brightness
 
-            #ticks_l, tick_r = myOdometry.get_position()
-            myOdometry.add_point(myOdometry.get_position())
+            ticks_l, ticks_r = myOdometry.get_position()
+            myOdometry.add_point(((ticks_l-ticks_previous_l),(ticks_r-ticks_previous_r)))
+            ticks_previous_l = ticks_l
+            ticks_previous_r = ticks_r
+
+            return ticks_previous_l, ticks_previous_r
 
     #done
     def stop(self):
@@ -135,27 +127,8 @@ class Motors:
         self.rm.stop()
         self.lm.stop()
 
-    #not a good solution
-    #not used
-    #just for test
-    def turn_left_wheel_revolutions(self, speed, revolutions, duration):
 
-        self.rm.reset()
-        self.lm.reset()
-        self.rm.stop_action = "brake"
-        self.lm.stop_action = "brake"
-
-        self.rm.position_sp = 360 * revolutions
-        self.lm.position_sp = -360 * revolutions
-        self.rm.speed_sp = speed
-        self.lm.speed_sp = speed
-        self.rm.command = "run-to-rel-pos"
-        self.lm.command = "run-to-rel-pos"
-        time.sleep(duration)
-        self.rm.stop()
-        self.lm.stop()
-
-    def turn_angle(self, speed, angle, duration):
+    def turn_angle(self, speed, angle):
 
         self.rm.position_sp = -angle * 2 #2 for speed = 100 (2.2 calculated and tested?)
         self.lm.position_sp = angle * 2 #for one rotation -> wheels 2.2 rotations
@@ -163,14 +136,46 @@ class Motors:
         self.lm.speed_sp = speed
         self.rm.command = "run-to-rel-pos"
         self.lm.command = "run-to-rel-pos"
-        time.sleep(duration)#wait.until?
+        #time.sleep(duration)#wait.until?
+        self.rm.wait_until_not_moving()
+
+    def detect_nodes(self, speed, cs):#new (25.08)
+        nodes = []
+        odometry = Odometry(self.lm, self.rm)
+        odometry.reset_position()
+        self.rm.position_sp = 360*2
+        self.lm.position_sp = -360*2
+        self.rm.speed_sp = speed
+        self.lm.speed_sp = speed
+        self.rm.command = "run-to-rel-pos"
+        self.lm.command = "run-to-rel-pos"
+        while self.rm.is_running:
+            if cs.get_brightness() < 200:
+                #odometry.add_point(odometry.get_position())
+                #_, _, gamma, _ = odometry.calculate_values()
+                #nodes.append(gamma)
+                nodes.append(self.rm.position/2)
+        return nodes
+
+    def turn_until_path_found(self, speed, cs):
+        odometry = Odometry(self.lm, self.rm)
+        odometry.reset_position()
+        self.rm.position_sp = 360 * 2
+        self.lm.position_sp = -360 * 2
+        self.rm.speed_sp = speed
+        self.lm.speed_sp = speed
+        self.rm.command = "run-to-rel-pos"
+        self.lm.command = "run-to-rel-pos"
+        while self.rm.is_running:
+            if cs.get_brightness() < 200:
+                self.stop()
+
+
 
     #done
     def drive_in_center_of_node(self, speed, duration, odometry):
         self.stop()
-        odometry.reset_position()#new
         self.drive_forward(speed, duration)
-        odometry.add_point(odometry.get_position())#new
         self.stop()
 
     #done
