@@ -53,88 +53,58 @@ class Robot:
 
                 if self.planet_name is None:
                     self.communication.send_ready()
+
                     while self.planet_name is None:
                         pass
+
                     self.odometry.reset_list()
-                    # print("Start location: " + str(self.start_location))
-                    old_dir = self.start_location[1]
-                    edge_dirs = self.cs.analyze(old_dir)
+                    forward_dir = self.start_location[1]
+                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]), (forward_dir + 180) % 360)
+                else:
+                    x, y, forward_dir = self.odometry.calculate_path(
+                        self.start_location[1], bottle_detected, self.start_location[0][0], self.start_location[0][1])
 
-                    current_pos = (self.start_location[0][0], self.start_location[0][1])
+                    send_dir = (forward_dir + 180) % 360
+                    self.communication.send_path(self.start_location, ((x, y), send_dir), bottle_detected)
 
-                    for d in edge_dirs:
+                    while self.end_location is None:
+                        pass
+
+                current_pos = (self.end_location[0][0], self.end_location[0][1])
+                forward_dir = (self.end_location[1] + 180) % 360
+
+                if current_pos in self.planet.scanned_nodes:
+                    time.sleep(2)
+                else:
+                    possible_dirs = self.cs.analyze(forward_dir)
+                    for d in possible_dirs:
                         if d not in self.planet.planet_dict[current_pos].keys():
                             self.planet.add_unexplored_edge(current_pos, d)
                     self.planet.scanned_nodes.append(current_pos)
 
-                    # print("Dirs: " + str(edge_dirs))
-                    # communication and path selection
-
-                    self.end_location = ((self.start_location[0][0], self.start_location[0][1]), (old_dir + 180) % 360)
-
-                    next_dir = self.choose_dir()
-
-                    # print("Old dir: " + str(old_dir))
-                    # print("New dir: " + str(next_dir))
-                    self.start_location = ((self.start_location[0][0], self.start_location[0][1]), next_dir)
-                    # print("End location: " + str(self.start_location))
-                    self.cs.select_new_path(old_dir, next_dir)
-
-                else:
-                    x, y, old_dir = self.odometry.calculate_path(
-                        self.start_location[1], bottle_detected, self.start_location[0][0], self.start_location[0][1])
-                    # print("Start location: " + str(self.start_location))
-
-                    send_dir = (old_dir + 180) % 360
-                    self.communication.send_path(self.start_location, ((x, y), send_dir), bottle_detected)
-
-                    # print("Old: " + str(((x, y), old_dir)))
-
-                    while self.end_location is None:
+                if current_pos == self.planet.target:
+                    self.communication.send_target_reached("Wir sind die da!")
+                    while self.running:
                         pass
-                    x = self.end_location[0][0]
-                    y = self.end_location[0][1]
-                    old_dir = (self.end_location[1] + 180) % 360
+                    continue
 
-                    current_pos = (self.end_location[0][0], self.end_location[0][1])
+                next_dir = self.choose_dir()
+                if next_dir == -1:
+                    self.communication.send_exploration_completed("Wir haben alles entdeckt!")
+                    while self.running:
+                        pass
+                    continue
 
-                    if current_pos in self.planet.scanned_nodes:
-                        time.sleep(2)
-                    else:
-                        unexplored_dirs = self.cs.analyze(old_dir)
-                        for d in unexplored_dirs:
-                            if d not in self.planet.planet_dict[current_pos].keys():
-                                self.planet.add_unexplored_edge(current_pos, d)
-                        self.planet.scanned_nodes.append(current_pos)
-
-                    if current_pos == self.planet.target:
-                        self.communication.send_target_reached("Wir sind die da!")
-                        while self.running:
-                            pass
-                        continue
-
-                    next_dir = self.choose_dir()
-                    if next_dir == -1:
-                        self.communication.send_exploration_completed("Wir haben alles entdeckt!")
-                        while self.running:
-                            pass
-                        continue
-
-                    # print("Old dir: " + str(old_dir))
-                    # print("New dir: " + str(next_dir))
-                    self.start_location = ((x, y), next_dir)
-                    # print("End location: " + str(self.start_location))
-                    self.cs.select_new_path(old_dir, next_dir)
-                # print("-------")
+                self.start_location = ((self.end_location[0][0], self.end_location[0][1]), next_dir)
+                self.cs.select_new_path(forward_dir, next_dir)
 
                 self.end_location = None
                 bottle_detected = False
                 self.odometry.reset_position()  # new ? necessary
             else:
                 ticks_previous_l, ticks_previous_r = self.motors.follow_line(0.5, self.cs, self.odometry, ticks_previous_l, ticks_previous_r)
-                #new (better solution?) -> multiple times calles -> ticks_previous needed
+                # new (better solution?) -> multiple times calles -> ticks_previous needed
                 counter = 0
-            continue
 
     def choose_dir(self):
         choice = -1
