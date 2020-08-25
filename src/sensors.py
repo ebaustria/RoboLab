@@ -32,7 +32,7 @@ class ColorSensor:
 
     #done
     def get_node(self):
-        interval = 25 #best interval?
+        interval = 30 #best interval?
         r, g, b = self.cs.bin_data("hhh")
         if abs(r-self.red[0]) < interval and abs(g-self.red[1]) < interval and abs(b-self.red[2]) < interval:
             return "red"
