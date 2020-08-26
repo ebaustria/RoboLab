@@ -4,9 +4,6 @@
 import math
 from enum import IntEnum, unique
 from typing import List, Tuple, Dict, Union
-import pprint
-
-pp = pprint.PrettyPrinter(indent=4)
 
 
 @unique
@@ -44,7 +41,6 @@ class Planet:
     it according to the specifications
     """
 
-    # TODO does Planet class need name attribute?
     def __init__(self):
         """ Initializes the data structure """
         self.target = None
@@ -52,13 +48,10 @@ class Planet:
         self.scanned_nodes = []
         self.unexplored_edges = {}
 
-    # If the start point of the path to add is not in the planet dictionary, an entry is created for it. The key is the
-    # start point, and the value is a dictionary. The start direction is added to the inner dictionary as a key. A tuple
-    # consisting of the target point, the end direction, and the edge weight is added as the value of the start
-    # direction. If the start point is in the planet dictionary, the value-tuple of the start direction is updated with
-    # new values. This process is then repeated for the opposite direction (target point and end direction as keys),
-    # with the additional condition that the target point is not None (prevents None from being added to the planet
-    # dictionary as a key).
+    # If the start point of the path to add is not in the planet dictionary, an entry is created for it. The same is
+    # done for the end point of the path to add. Afterwards, a key-value pair is added to the inner dictionaries of the
+    # start and end points. If the inner dictionaries of either the start point or the end point contain 4 key-value
+    # pairs and the respective point is not in the list of fully scanned nodes, then it is added to that list.
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                  weight: int):
         """
@@ -114,6 +107,7 @@ class Planet:
 
         return self.planet_dict
 
+    # Returns a list of all the nodes in the planet dictionary.
     def get_nodes(self) -> List[Tuple[int, int]]:
         nodes = []
 
@@ -122,17 +116,23 @@ class Planet:
 
         return nodes
 
+    # Returns the next direction to take in the shortest path (the second element in the first tuple in the shortest
+    # path).
     def shortest_next_dir(self, start: Tuple[int, int], target: Tuple[int, int]) -> Direction:
         shortest_path = self.shortest_path(start, target)
 
         return shortest_path[0][1]
 
+    # Maps an unexplored edge to a node in the dictionary of unexplored edges (used when scanning for edges at a node).
     def add_unexplored_edge(self, node: Tuple[int, int], direction: Direction) -> None:
         if node not in self.unexplored_edges:
             self.unexplored_edges[node] = []
 
         self.unexplored_edges[node].append(direction)
 
+    # Removes an unexplored edge from the list of unexplored edges that is mapped to a node in the dictionary of
+    # unexplored edges. Afterwards, if an empty list of unexplored edges is mapped to the node, the key-value pair is
+    # removed from the dictionary.
     def remove_unexplored_edge(self, start: Tuple[Tuple[int, int], Direction], end: Tuple[Tuple[int, int], Direction])\
             -> None:
         start_dir = start[1]
@@ -190,12 +190,8 @@ class Planet:
             else:
                 unvisited[node] = math.inf
 
-        # As long as the target has not been visited, iterate over the neighbors of the current node. If the neighbor is
-        # unvisited and the weight of the edge that connects it to the current node is not -1 (i.e. the path is not
-        # blocked), add the current_node's tentative distance to the weight of the edge between the current node and the
-        # neighbor. If this number is smaller than the tentative distance of the neighbor, then it becomes the
-        # neighbor's new tentative distance, and the current node and the start direction that leads to the neighbor are
-        # marked as the neighbor's tentative precursor.
+        # Until the target has been marked as visited: check the neighbors of the current node, reassign neighbors'
+        # tentative distances, and map tentative precursor nodes to neighbors, if necessary.
         while target in unvisited:
             current_neighbors = self.planet_dict[current_node].items()
             for (start_dir, path) in current_neighbors:
@@ -211,15 +207,12 @@ class Planet:
             # Mark the current node as visited after checking its neighbors.
             unvisited.pop(current_node)
 
-            # Find the unvisited node with the lowest tentative distance and set it to the current node.
+            # Find the unvisited node with the lowest tentative distance and set it as the new current node.
             for (node, distance) in unvisited.items():
                 if distance == min(unvisited.values()):
                     current_node = node
 
-        # Exit the while loop when the target has been marked as visited and append its precursor to the empty shortest
-        # path. If the target is not in the dictionary of precursors, return None instead (This should theoretically
-        # only happen if the target is only connected to blocked edges. I don't think this is actually possible because
-        # of path_exists, but better safe than sorry.
+        # Exit the while loop when the target has been marked as visited and initialize the shortest path.
         if target in precursor_compass_dict.keys():
             shortest_path.append(precursor_compass_dict[target])
         else:
@@ -261,6 +254,7 @@ class Planet:
 
         return False
 
+    # Calculates the distance of the shortest path between a start point and a target point.
     def shortest_distance(self, start: Tuple[int, int], target: Tuple[int, int]):
         shortest = self.shortest_path(start, target)
 
