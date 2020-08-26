@@ -53,6 +53,7 @@ class Robot:
                 # Rotate robot to drive back, and save that an obstacle was detected
                 self.cs.rotate_to_path(180)
                 bottle_detected = True
+                # TODO Add sound
                 continue
 
             # Test if robot reached node
@@ -156,7 +157,7 @@ class Robot:
                 self.odometry.reset_position()
             else:
                 # Follow line and save last data for next tick
-                ticks_previous_l, ticks_previous_r = self.motors.follow_line(0.5, self.cs, self.odometry, ticks_previous_l, ticks_previous_r)
+                ticks_previous_l, ticks_previous_r = self.motors.follow_line(0.5, self.cs, ticks_previous_l, ticks_previous_r)
                 # new (better solution?) -> multiple times calles -> ticks_previous needed
                 counter = 0
 

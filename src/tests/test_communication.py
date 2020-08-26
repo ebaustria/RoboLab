@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-
 import unittest.mock
-
 import paho.mqtt.client as mqtt
 import json
 import time
@@ -10,6 +8,7 @@ from communication import Communication
 
 
 class TestRoboLabCommunication(unittest.TestCase):
+
     @unittest.mock.patch('logging.Logger')
     def setUp(self, mock_logger):
         """
@@ -25,8 +24,9 @@ class TestRoboLabCommunication(unittest.TestCase):
         self.communication = Communication(client, mock_logger)
 
         # Syntax check channel
-        client.subscribe('comtest/117', qos=1)
+        client.subscribe('comtest/117', qos=2)
 
+        # Setup test cases
         self.ready_cor = {
             "from": "client",
             "type": "ready"
