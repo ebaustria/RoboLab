@@ -1,5 +1,7 @@
 # !/usr/bin/env python3
 import math
+
+from typing import Tuple
 from planet import Direction
 
 
@@ -34,33 +36,33 @@ class Odometry:
 
         return (dr - dl) / distance_wheels
 
-    def get_path_length(self, ticks_l: float, ticks_r: float):#alpha in arc measure
+    def get_path_length(self, ticks_l: float, ticks_r: float):  # alpha in arc measure
         alpha = self.get_angle_alpha(ticks_l, ticks_r)
         if alpha == 0:
-            a, b = self.get_distance(ticks_l, ticks_r) #a = b (round)
+            a, b = self.get_distance(ticks_l, ticks_r)  # a = b (round)
             return a
         else:
             dl, dr = self.get_distance(ticks_l, ticks_r)
             return (dr + dl) / alpha * math.sin(alpha / 2)
 
-    def get_dif_x(self, gamma_old: float, ticks_l: float, ticks_r: float):#gamma_old in arc measure
+    def get_dif_x(self, gamma_old: float, ticks_l: float, ticks_r: float):  # gamma_old in arc measure
         length = self.get_path_length(ticks_l, ticks_r)
         beta = self.get_angle_alpha(ticks_l, ticks_r) / 2
 
         return -math.sin(gamma_old + beta) * length
 
-    def get_dif_y(self, gamma_old: float, ticks_l: float, ticks_r: float):#gamma_old in arc measure
+    def get_dif_y(self, gamma_old: float, ticks_l: float, ticks_r: float):  # gamma_old in arc measure
         length = self.get_path_length(ticks_l, ticks_r)
         beta = self.get_angle_alpha(ticks_l, ticks_r) / 2
 
         return math.cos(gamma_old + beta) * length
 
-    def get_gamma_new(self, gamma_old: float, ticks_l: float, ticks_r: float):#gamma_old, alpha in arc measure
+    def get_gamma_new(self, gamma_old: float, ticks_l: float, ticks_r: float):  # gamma_old, alpha in arc measure
         alpha = self.get_angle_alpha(ticks_l, ticks_r)
 
-        return gamma_old + alpha #mod 2 pi?
+        return gamma_old + alpha  # mod 2 pi?
 
-    def add_point(self, tupel_ticks: float):
+    def add_point(self, tupel_ticks: Tuple[float, float]):
         self.tick_list.append(tupel_ticks)
 
     def get_tupel_list(self):
@@ -71,14 +73,14 @@ class Odometry:
         dif_x, dif_y = 0, 0
         gamma, gamma_old = 0, 0
 
-        #test start
+        # test start
         l = self.get_tupel_list()
         for i in range(10, len(l)):
             ticks_l = l[i][0]
             ticks_r = l[i][1]
-        #test end
+        # test end
 
-        #for tupel in :
+        # for tupel in :
         #    ticks_l = tupel[0]
         #    ticks_r = tupel[1]
 
@@ -89,7 +91,7 @@ class Odometry:
 
             gamma_old = gamma
 
-        return dif_x, dif_y, gamma, length #length not necessary
+        return dif_x, dif_y, gamma, length  # length not necessary
 
     def get_cardinal_point(self, gamma_in_grad: float, old_dir: int):
         cardinal_points = [0, 270, 180, 90]  # NORTH, WEST, SOUTH, EAST

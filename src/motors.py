@@ -3,7 +3,6 @@ import time
 import math
 
 from odometry import Odometry
-from sensors import ColorSensor
 
 
 class Motors:
@@ -20,10 +19,8 @@ class Motors:
 
         self.rm.stop_action = "brake"
         self.lm.stop_action = "brake"
-
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
-
         self.rm.command = "run-forever"
         self.lm.command = "run-forever"
 
@@ -100,8 +97,8 @@ class Motors:
         self.lm.stop()
 
     def turn_angle(self, speed: float, angle: float):
-        self.rm.position_sp = -angle * 2 #2 for speed = 100 (2.2 calculated and tested?)
-        self.lm.position_sp = angle * 2 #for one rotation -> wheels 2.2 rotations
+        self.rm.position_sp = -angle * 2  # 2 for speed = 100 (2.2 calculated and tested?)
+        self.lm.position_sp = angle * 2  # for one rotation -> wheels 2.2 rotations
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
         self.rm.command = "run-to-rel-pos"
@@ -109,7 +106,7 @@ class Motors:
 
         self.rm.wait_until_not_moving()
 
-    def detect_nodes(self, speed: float, cs: ColorSensor):
+    def detect_nodes(self, speed: float, cs):
         self.odometry.reset_position()
 
         self.rm.position_sp = 360 * 2
@@ -126,7 +123,7 @@ class Motors:
 
         return nodes
 
-    def turn_until_path_found(self, speed: float, cs: ColorSensor):
+    def turn_until_path_found(self, speed: float, cs):
         self.odometry.reset_position()
 
         self.rm.position_sp = 360 * 2
@@ -147,6 +144,6 @@ class Motors:
         self.drive_forward(speed, duration)
 
         ticks_l, ticks_r = self.odometry.get_position()
-        self.odometry.add_point((ticks_l-previous_ticks_l, ticks_r-previous_ticks_r))
+        self.odometry.add_point((ticks_l - previous_ticks_l, ticks_r - previous_ticks_r))
 
         self.stop()
