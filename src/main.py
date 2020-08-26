@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-
-
 import logging
 import os
 import paho.mqtt.client as mqtt
@@ -13,7 +11,6 @@ from uuid import uuid4
 #from odometry import Odometry
 
 client = None  # DO NOT EDIT
-
 
 
 def run():

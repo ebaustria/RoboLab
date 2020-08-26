@@ -4,8 +4,8 @@
 import json
 import platform
 import ssl
-from typing import Tuple
 
+from typing import Tuple
 from planet import Direction
 
 # Fix: SSL certificate problem on macOS
@@ -32,19 +32,24 @@ class Communication:
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
 
+        # Setup logger
+        self.logger = logger
+
+        # Save robot to access variables
         self.robot = robot
 
+        # Create connection to mqtt server
         self.client.username_pw_set('117', password='0QOfuyjhr0')  # Your group credentials
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
 
-        # Main channel
+        # Subscrible to main channel
         self.client.subscribe('explorer/117', qos=2)
 
-        self.logger = logger
-
+        # Start message loop
         self.client.loop_start()
 
     def __del__(self):
+        # Shut down connection
         self.client.loop_stop()
         self.client.disconnect()
 
@@ -66,6 +71,7 @@ class Communication:
         if payload["from"] == "client":
             return
 
+        # Debug message print
         print("<<< " + message.payload.decode('utf-8'))
 
         # Get type of payload
@@ -89,11 +95,11 @@ class Communication:
             """
 
             # Read information from payload
-
             start_x = payload["payload"]["startX"]
             start_y = payload["payload"]["startY"]
             start_dir = payload["payload"]["startOrientation"]
 
+            # Save information to robot
             self.robot.start_location = ((start_x, start_y), start_dir)
             self.robot.planet_name = payload["payload"]["planetName"]
 
@@ -121,23 +127,24 @@ class Communication:
             }
             """
 
+            # Read information from payload
             start_x = payload["payload"]["startX"]
             start_y = payload["payload"]["startY"]
             start_dir = payload["payload"]["startDirection"]
             end_x = payload["payload"]["endX"]
             end_y = payload["payload"]["endY"]
             end_dir = payload["payload"]["endDirection"]
-            blocked = payload["payload"]["pathStatus"] == "blocked"
             weight = payload["payload"]["pathWeight"]
 
+            # Construct start and end node
             start = ((start_x, start_y), start_dir)
             end = ((end_x, end_y), end_dir)
 
-            if blocked:
-                weight = -1
-
+            # Add path to dictionary
             self.robot.planet.add_path(start, end, weight)
+            # Remove path from unexplored edges
             self.robot.planet.remove_unexplored_edge(start, end)
+            # Save information to robot
             self.robot.end_location = end
         # pathSelect-Message
         elif payload_type == "pathSelect":
@@ -152,6 +159,7 @@ class Communication:
             }
             """
 
+            # Read and save information to robot
             self.robot.path_choice = payload["payload"]["startDirection"]
         # pathUnveiled-Message
         elif payload_type == "pathUnveiled":
@@ -174,22 +182,22 @@ class Communication:
             }
             """
 
+            # Read information from payload
             start_x = payload["payload"]["startX"]
             start_y = payload["payload"]["startY"]
             start_dir = payload["payload"]["startDirection"]
             end_x = payload["payload"]["endX"]
             end_y = payload["payload"]["endY"]
             end_dir = payload["payload"]["endDirection"]
-            blocked = payload["payload"]["pathStatus"] == "blocked"
             weight = payload["payload"]["pathWeight"]
 
+            # Construct start and end node
             start = ((start_x, start_y), start_dir)
             end = ((end_x, end_y), end_dir)
 
-            if blocked:
-                weight = -1
-
+            # Add path to dictionary
             self.robot.planet.add_path(start, end, weight)
+            # Remove path from unexplored edges
             self.robot.planet.remove_unexplored_edge(start, end)
         # target-Message
         elif payload_type == "target":
@@ -205,9 +213,11 @@ class Communication:
             }
             """
 
+            # Read information from payload
             target_x = payload["payload"]["targetX"]
             target_y = payload["payload"]["targetY"]
 
+            # Save information to robot
             self.robot.planet.target = (target_x, target_y)
         # done-Message
         elif payload_type == "done":
@@ -222,9 +232,12 @@ class Communication:
             }
             """
 
+            # Read information from payload
             msg = payload["payload"]["message"]
-            self.logger.debug(msg)
+            # Print message
+            print(msg)
 
+            # Save information to robot
             self.robot.running = False
 
     def send_planet_name(self, name: str):
@@ -308,7 +321,6 @@ class Communication:
         }
 
         self.send_message("planet/%s/117" % self.robot.planet_name, payload)
-        
 
     def send_path_select(self, choice: Tuple[Tuple[int, int], Direction]):
         """
@@ -404,7 +416,11 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS
+
+        # Debug message print
         print(">>> " + json.dumps(message))
+
+        # Publish message to topic
         self.client.publish(topic, payload=json.dumps(message), qos=1)
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
