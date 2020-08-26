@@ -20,6 +20,7 @@ class Robot:
         # Setup Sensors, Motors and Odometry
         self.rm = ev3.LargeMotor("outB")
         self.lm = ev3.LargeMotor("outC")
+        self.sound = ev3.Sound()
         self.odometry = Odometry(self.lm, self.rm)
         self.motors = Motors(self.odometry)
         self.cs = ColorSensor(self.motors)
@@ -51,9 +52,9 @@ class Robot:
             # Test if robot detect an obstacle
             if self.us.get_distance() < 15:
                 # Rotate robot to drive back, and save that an obstacle was detected
+                self.sound.play("/home/robot/src/found.wav")
                 self.cs.rotate_to_path(180)
                 bottle_detected = True
-                # TODO Add sound
                 continue
 
             # Test if robot reached node
@@ -123,26 +124,26 @@ class Robot:
                 # Test if robot reached the target
                 if current_pos == self.planet.target:
                     # Send targetReached to mothership
-                    self.communication.send_target_reached("Wir sind die da!")
+                    self.communication.send_target_reached("Target reached!")
 
                     # Wait until confirmation
                     while self.running:
                         pass
-                    # TODO Add sound
+                    self.sound.speak("Target reached")
                     continue
 
                 # Calculate next direction based on planet information and posible directions
                 next_dir = self.choose_dir()
 
-                # If no direction is found: Exloration complete
+                # If no direction is found: Exloration completed
                 if next_dir == -1:
                     # Send explorationCompleted to mothership
-                    self.communication.send_exploration_completed("Wir haben alles entdeckt!")
+                    self.communication.send_exploration_completed("Exloration completed!")
 
                     # Wait until confirmation
                     while self.running:
                         pass
-                    # TODO Add sound
+                    self.sound.speak("Exloration completed")
                     continue
 
                 # Save new starting postion for next path
@@ -229,6 +230,7 @@ class Robot:
         # Reset Variable
         self.path_choice = None
 
-        # TODO Add sound
+        # Play sound
+        self.sound.beep()
 
         return choice
