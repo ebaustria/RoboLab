@@ -5,10 +5,6 @@ import paho.mqtt.client as mqtt
 
 from robot import Robot
 from uuid import uuid4
-#only for test (26.8)
-#from motors import Motors
-#from sensors import ColorSensor
-#from odometry import Odometry
 
 client = None  # DO NOT EDIT
 
@@ -35,27 +31,10 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
-    #nod needed for PID test
+    # Setup robot
     robot = Robot(client, logger)
+    # Start and run robot
     robot.run()
-
-    '''motor = Motors()
-    cs = ColorSensor(motor)
-    cs.calibrate_colors()
-    lm, rm = motor.get_motors()
-    od = Odometry(lm, rm)
-
-    print("Press Button to start")
-    cs.button_pressed()
-
-    ticks_l = 0
-    ticks_r = 0
-    while True:
-        ticks_l, ticks_r = motor.follow_line(0.5, cs, od, ticks_l, ticks_r)
-    '''
-
-
-
 
 
 # DO NOT EDIT

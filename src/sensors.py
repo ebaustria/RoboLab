@@ -79,7 +79,7 @@ class ColorSensor:
         return r, g, b
 
     def rotate_to_path(self, angle: int):
-        self.motors.turn_angle(100, angle + 30)
+        self.motors.turn_angle(100, angle + 40)
         brightness = self.get_brightness()
 
         while brightness > 200:
@@ -99,8 +99,9 @@ class ColorSensor:
 
     def select_new_path(self, old_dir: int, new_dir: int):
         angle = new_dir - old_dir
-        if angle > 180:
-            angle -= 360
+
+        #if angle > 180:
+        #    angle -= 360
 
         self.rotate_to_path(angle)
 
