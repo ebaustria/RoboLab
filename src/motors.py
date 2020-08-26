@@ -80,6 +80,7 @@ class Motors:
     def follow_line(self, duration, myColorSensor, myOdometry, ticks_previous_l, ticks_previous_r): #myOdometry new
         r, g, b = myColorSensor.get_colors()
         previous_brightness = math.sqrt(r**2 + g**2 + b**2) # for D-Controller
+        #previous_error_d = 0
         right_speed = 0
         left_speed = 0
 
@@ -95,20 +96,24 @@ class Motors:
 
 
 
-            multiplicator_p = 0.4#???
-            multiplicator_d = 0.08#???
+            multiplicator_p = 0.4#??? 0.57   0.4
+            multiplicator_d = 0.2#??? 0.8 0.1
+            #multiplicator_d = 0.1
+
             error_p = brightness - 350
-            error_d = brightness - previous_brightness
+            error_d = brightness - previous_brightness#error - previous_error_p
+            #error_d = error_d-previous_error_d
             turn = multiplicator_p*error_p + multiplicator_d*error_d#(change y)/(change x)*error
 
+
             #maybe I-Controller instead
-            '''if error_d > 250:
-                offset = 50
-            elif 100 < error_d <= 250:
-                offset = 100
+
+            if 150 < brightness <= 450:
+                offset = 200
             else:
-                offset = 200'''
-            offset = 200
+                offset = 150
+
+            #offset = 200
 
             right_speed = offset + turn
             left_speed = offset - turn
@@ -120,13 +125,14 @@ class Motors:
             time.sleep(duration/10)
 
             previous_brightness = brightness
+            #previous_error_d = error_d
 
             ticks_l, ticks_r = myOdometry.get_position()
             myOdometry.add_point(((ticks_l-ticks_previous_l),(ticks_r-ticks_previous_r)))
             ticks_previous_l = ticks_l
             ticks_previous_r = ticks_r
 
-            return ticks_previous_l, ticks_previous_r
+        return ticks_previous_l, ticks_previous_r
 
     #done
     def stop(self):
