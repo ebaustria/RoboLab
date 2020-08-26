@@ -46,13 +46,23 @@ class TestRoboLabPlanet(unittest.TestCase):
         MODEL YOUR TEST PLANET HERE (if you'd like):
 
         """
+
+        """
+        planet planet:
+        
+        (0, 2)----4----(2, 2)
+          |              |
+          1              2
+          |              |
+        (0, 0)----2----(2, 0)
+        """
         self.planet = Planet()
 
         self.planet.add_path(((0, 0), Direction.EAST), ((2, 0), Direction.WEST), 2)
         self.planet.add_path(((0, 0), Direction.NORTH), ((0, 2), Direction.SOUTH), 1)
         self.planet.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 4)
         self.planet.add_path(((2, 2), Direction.SOUTH), ((2, 0), Direction.NORTH), 2)
-        self.planet.add_path(((1, 2), Direction.WEST), ((1, 2), Direction.NORTH), 1)
+        # self.planet.add_path(((1, 2), Direction.WEST), ((1, 2), Direction.NORTH), 1)
 
         """
                 planet same:
@@ -175,6 +185,35 @@ class TestRoboLabPlanet(unittest.TestCase):
         self.one_path.add_path(((2, 2), Direction.NORTH), ((3, 3), Direction.WEST), -1)
         self.one_path.add_path(((2, 2), Direction.EAST), ((3, 3), Direction.SOUTH), 1)
 
+        """
+        planet loops:
+        
+        +--1--+               +---1--+
+        |     |               |      |
+        |     |               |      |
+        +---(0, 2)----1-----(2, 2)---+
+              |               |
+              |               |
+              1               1
+              |               |
+              |               |
+        +---(0, 0)----1-----(2, 0)--+
+        |     |               |     |
+        |     |               |     |
+        +--1--+               +--1--+
+        """
+
+        self.loops = Planet()
+
+        self.loops.add_path(((0, 0), Direction.WEST), ((0, 0), Direction.SOUTH), 1)
+        self.loops.add_path(((0, 0), Direction.NORTH), ((0, 2), Direction.SOUTH), 1)
+        self.loops.add_path(((0, 0), Direction.EAST), ((2, 0), Direction.WEST), 1)
+        self.loops.add_path(((0, 2), Direction.WEST), ((0, 2), Direction.NORTH), 1)
+        self.loops.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 1)
+        self.loops.add_path(((2, 0), Direction.SOUTH), ((2, 0), Direction.EAST), 1)
+        self.loops.add_path(((2, 0), Direction.NORTH), ((2, 2), Direction.SOUTH), 1)
+        self.loops.add_path(((2, 2), Direction.NORTH), ((2, 2), Direction.EAST), 1)
+
         self.empty = Planet()
 
     def test_integrity(self):
@@ -185,8 +224,6 @@ class TestRoboLabPlanet(unittest.TestCase):
         b = self.planet.get_paths()
         self.assertEqual({(0, 0): {Direction.EAST: ((2, 0), Direction.WEST, 2),
                                    Direction.NORTH: ((0, 2), Direction.SOUTH, 1)},
-                          (1, 2): {Direction.NORTH: ((1, 2), Direction.WEST, 1),
-                                   Direction.WEST: ((1, 2), Direction.NORTH, 1)},
                           (2, 0): {Direction.WEST: ((0, 0), Direction.EAST, 2),
                                    Direction.NORTH: ((2, 2), Direction.SOUTH, 2)},
                           (0, 2): {Direction.SOUTH: ((0, 0), Direction.NORTH, 1),
@@ -243,18 +280,26 @@ class TestRoboLabPlanet(unittest.TestCase):
         my_list_of_paths_1 = []
         my_list_of_paths_1.append(shortest_same_1)
 
-        self.assertEqual(len(shortest_same_1), 2)
-        self.assertEqual(len(my_list_of_paths_1), 1)
-        self.assertEqual([((0, 0), Direction.EAST), ((2, 0), Direction.NORTH)], shortest_same_1)
-
         shortest_same_2 = self.big.shortest_path((0, 0), (4, -1))
         my_list_of_paths_2 = []
         my_list_of_paths_2.append(shortest_same_2)
+
+        shortest_same_3 = self.loops.shortest_path((0, 0), (2, 2))
+        my_list_of_paths_3 = []
+        my_list_of_paths_3.append(shortest_same_3)
+
+        self.assertEqual(len(shortest_same_1), 2)
+        self.assertEqual(len(my_list_of_paths_1), 1)
+        self.assertEqual([((0, 0), Direction.EAST), ((2, 0), Direction.NORTH)], shortest_same_1)
 
         self.assertEqual(len(shortest_same_2), 5)
         self.assertEqual(len(my_list_of_paths_2), 1)
         self.assertEqual([((0, 0), Direction.NORTH), ((0, 2), Direction.NORTH),
                           ((2, 2), Direction.EAST), ((3, 1), Direction.EAST), ((4, 1), Direction.SOUTH)], shortest_same_2)
+
+        self.assertEqual(len(shortest_same_3), 2)
+        self.assertEqual(len(my_list_of_paths_3), 1)
+        self.assertEqual([((0, 0), Direction.EAST), ((2, 0), Direction.NORTH)], shortest_same_3)
 
     def test_target_with_loop(self):
         """
@@ -263,8 +308,14 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is reachable
         """
-        # TODO think more about this unit test
-        self.same.shortest_path((0, 0), (2, 2))
+
+        shortest_1 = self.same.shortest_path((0, 0), (2, 2))
+        shortest_2 = self.big.shortest_path((0, 0), (4, -1))
+        shortest_3 = self.loops.shortest_path((0, 0), (2, 2))
+
+        self.assertIsNotNone(shortest_1)
+        self.assertIsNotNone(shortest_2)
+        self.assertIsNotNone(shortest_3)
 
     def test_target_not_reachable_with_loop(self):
         """
@@ -325,7 +376,7 @@ class TestRoboLabPlanet(unittest.TestCase):
         """
         This test checks that the shortest-path algorithm avoids blocked edges when searching for a shortest path.
 
-        Result: Target is reachable
+        Result: Only one path without blocked edges exists, and that is the path that is returned.
         """
 
         path = self.one_path.shortest_path((0, 0), (2, 2))
