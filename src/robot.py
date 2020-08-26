@@ -1,3 +1,4 @@
+import sensors
 from planet import Planet
 from communication import Communication
 from odometry import Odometry
@@ -17,8 +18,8 @@ class Robot:
         self.rm = ev3.LargeMotor("outB")
         self.lm = ev3.LargeMotor("outC")
         self.odometry = Odometry(self.lm, self.rm)
+        self.motors = Motors(self.odometry)
         self.communication = Communication(mqtt_client, logger, self)
-        self.motors = Motors()
 
         self.cs = ColorSensor(self.motors)
         self.us = Ultrasonic()
@@ -36,19 +37,18 @@ class Robot:
         self.cs.calibrate_colors()
 
         print("Press Button to start")
-        self.cs.button_pressed()
+        sensors.button_pressed()
 
         while self.running:
             if self.us.get_distance() < 15:
                 self.cs.rotate_to_path(180)
-                # print("Bottle detected")
                 bottle_detected = True
                 continue
 
-            if (self.cs.get_node() == "blue" or self.cs.get_node() == "red") and counter == 0:
+            if self.cs.get_node() in ["blue", "red"] and counter == 0:
                 counter += 1
 
-                self.motors.drive_in_center_of_node(100, 2, self.odometry)
+                self.motors.drive_in_center_of_node(100, 2)
 
                 if self.planet_name is None:
                     self.communication.send_ready()
