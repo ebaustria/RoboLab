@@ -136,7 +136,9 @@ class Robot:
                     distance = cur
                     nearest = node
 
-            if distance == 0:
+            if distance == math.inf:
+                return -1
+            elif distance == 0:
                 choice = self.planet.unexplored_edges[nearest][0]
             else:
                 choice = self.planet.shortest_next_dir(self.end_location[0], nearest)
