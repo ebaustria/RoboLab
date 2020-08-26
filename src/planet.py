@@ -135,19 +135,22 @@ class Planet:
 
     def remove_unexplored_edge(self, start: Tuple[Tuple[int, int], Direction], end: Tuple[Tuple[int, int], Direction])\
             -> None:
-
         start_dir = start[1]
         end_dir = end[1]
+        start_point = start[0]
+        end_point = end[0]
 
-        if start[0] in self.unexplored_edges and start_dir in self.unexplored_edges[start[0]]:
-            self.unexplored_edges[start[0]].remove(start_dir)
-            if len(self.unexplored_edges[start[0]]) == 0:
-                del self.unexplored_edges[start[0]]
+        if start_point in self.unexplored_edges and start_dir in self.unexplored_edges[start_point]:
+            self.unexplored_edges[start_point].remove(start_dir)
 
-        if end[0] in self.unexplored_edges and end_dir in self.unexplored_edges[end[0]]:
-            self.unexplored_edges[end[0]].remove(end_dir)
-            if len(self.unexplored_edges[end[0]]) == 0:
-                del self.unexplored_edges[end[0]]
+            if len(self.unexplored_edges[start_point]) == 0:
+                del self.unexplored_edges[start_point]
+
+        if end_point in self.unexplored_edges and end_dir in self.unexplored_edges[end_point]:
+            self.unexplored_edges[end_point].remove(end_dir)
+
+            if len(self.unexplored_edges[end_point]) == 0:
+                del self.unexplored_edges[end_point]
 
     # Implementation of Dijkstra's algorithm.
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[None, List[Tuple[Tuple[int, int],
@@ -169,17 +172,14 @@ class Planet:
         shortest_path = []
 
         if start == target:
-            # print("Target reached.")
             return shortest_path
 
         # If the target node is not in the planet dictionary, then it cannot be found/reached. Return None.
         if target not in self.planet_dict.keys():
-            # print("Target is unexplored.")
             return None
 
         # If no path exists between the start node and the target, return None.
         if not self.path_exists(start, target):
-            # print("Target is unreachable.")
             return None
 
         # All nodes are marked unvisited. The start node is given the tentative distance of 0, and the other nodes are
@@ -223,7 +223,6 @@ class Planet:
         if target in precursor_compass_dict.keys():
             shortest_path.append(precursor_compass_dict[target])
         else:
-            # print("Target is unreachable.")
             return None
 
         # Iterate over the shortest path until the start node is reached. On every iteration, add the respective node's
@@ -235,7 +234,6 @@ class Planet:
 
         shortest_path.reverse()
 
-        # print("Target is reachable.")
         return shortest_path
 
     # Helper function for determining whether a given target node can be reached from a given start node. Intended to
@@ -270,7 +268,7 @@ class Planet:
             return math.inf
 
         weight = 0
-        for (pos, dir) in shortest:
-            weight += self.planet_dict[pos][dir][2]
+        for (pos, direction) in shortest:
+            weight += self.planet_dict[pos][direction][2]
 
         return weight
