@@ -3,7 +3,8 @@ import time
 import math
 
 from odometry import Odometry
-from sensors import ColorSensor
+#from sensors import ColorSensor
+#import sensors
 
 
 class Motors:
@@ -36,34 +37,25 @@ class Motors:
         self.drive_forward(-speed, duration)
 
     #in progress (PID-Controller)
-    def follow_line(self, duration, myColorSensor, myOdometry, ticks_previous_l, ticks_previous_r): #myOdometry new
-        r, g, b = myColorSensor.get_colors()
+    def follow_line(self, duration: float, cs, odometry, ticks_previous_l: int, ticks_previous_r: int):
+        r, g, b = cs.get_colors()
         previous_brightness = math.sqrt(r**2 + g**2 + b**2) # for D-Controller
         #previous_error_d = 0
         right_speed = 0
         left_speed = 0
 
-
-
-
+        #duration in 10 intervals separated
         for i in range(0, int(duration*10)):
-            #Odometry: coordinates(ticks) to default 0
-            #myOdometry.reset_position()
-
-            r, g, b = myColorSensor.get_colors()
+            r, g, b = cs.get_colors()
             brightness = math.sqrt(r**2 + g**2 + b**2)
 
-
-
-            multiplicator_p = 0.4#??? 0.57   0.4
-            multiplicator_d = 0.2#??? 0.8 0.1
-            #multiplicator_d = 0.1
+            multiplicator_p = 0.4
+            multiplicator_d = 0.2
 
             error_p = brightness - 350
-            error_d = brightness - previous_brightness#error - previous_error_p
+            error_d = brightness - previous_brightness
             #error_d = error_d-previous_error_d
             turn = multiplicator_p*error_p + multiplicator_d*error_d#(change y)/(change x)*error
-
 
             #maybe I-Controller instead
 
@@ -71,8 +63,6 @@ class Motors:
                 offset = 200
             else:
                 offset = 150
-
-            #offset = 200
 
             right_speed = offset + turn
             left_speed = offset - turn
@@ -86,8 +76,8 @@ class Motors:
             previous_brightness = brightness
             #previous_error_d = error_d
 
-            ticks_l, ticks_r = myOdometry.get_position()
-            myOdometry.add_point(((ticks_l-ticks_previous_l),(ticks_r-ticks_previous_r)))
+            ticks_l, ticks_r = odometry.get_position()
+            odometry.add_point(((ticks_l-ticks_previous_l),(ticks_r-ticks_previous_r)))
             ticks_previous_l = ticks_l
             ticks_previous_r = ticks_r
 
@@ -109,7 +99,7 @@ class Motors:
 
         self.rm.wait_until_not_moving()
 
-    def detect_nodes(self, speed: float, cs: ColorSensor):
+    def detect_nodes(self, speed: float, cs):
         self.odometry.reset_position()
 
         self.rm.position_sp = 360 * 2
@@ -126,7 +116,7 @@ class Motors:
 
         return nodes
 
-    def turn_until_path_found(self, speed: float, cs: ColorSensor):
+    def turn_until_path_found(self, speed: float, cs):
         self.odometry.reset_position()
 
         self.rm.position_sp = 360 * 2

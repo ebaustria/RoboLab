@@ -10,7 +10,9 @@ from uuid import uuid4
 #only for test (26.8)
 #from motors import Motors
 #from sensors import ColorSensor
+#import sensors
 #from odometry import Odometry
+#import ev3dev.ev3 as ev3
 
 client = None  # DO NOT EDIT
 
@@ -42,14 +44,16 @@ def run():
     robot = Robot(client, logger)
     robot.run()
 
-    '''motor = Motors()
+    '''
+    rm = ev3.LargeMotor("outB")
+    lm = ev3.LargeMotor("outC")
+    od = Odometry(lm, rm)
+    motor = Motors(od)
     cs = ColorSensor(motor)
     cs.calibrate_colors()
-    lm, rm = motor.get_motors()
-    od = Odometry(lm, rm)
-
+    #lm, rm = motor.get_motors()
     print("Press Button to start")
-    cs.button_pressed()
+    sensors.button_pressed()
 
     ticks_l = 0
     ticks_r = 0
