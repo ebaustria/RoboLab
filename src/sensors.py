@@ -70,11 +70,11 @@ class ColorSensor:
         self.blue = self.initialize_color("BLUE")
 
     def initialize_color(self, color: str):
-        print("Initialization " + color)
+        print("» Press Button to initialize: %s" % color)
         button_pressed()
 
         r, g, b = self.cs.bin_data("hhh")
-        print("red: " + str(r) + " green: " + str(g) + " blue: " + str(b))
+        print("Red: {0}, Green: {1}, Blue: {2}".format(r, g, b))
 
         return r, g, b
 
@@ -99,9 +99,6 @@ class ColorSensor:
 
     def select_new_path(self, old_dir: int, new_dir: int):
         angle = new_dir - old_dir
-
-        #if angle > 180:
-        #    angle -= 360
 
         self.rotate_to_path(angle)
 

@@ -3,7 +3,7 @@ import ev3dev.ev3 as ev3
 import math
 import time
 
-from planet import Planet
+from planet import Planet, Direction
 from communication import Communication
 from odometry import Odometry
 from motors import Motors
@@ -40,12 +40,26 @@ class Robot:
         bottle_detected = False
         ticks_previous_l, ticks_previous_r = 0, 0
 
+        start_message = """
+##################################
+#                                #
+#     RoboLab Praktikum 2020     #
+#      Exploration by Paula      #
+#          ❰❱ with ❤ by          #
+#        Eric, Marc, Nico        #
+#                                #
+##################################
+                        """
+        # Print start screen
+        print(start_message)
+
         # Calibrate colors for better color accuracy
         self.cs.calibrate_colors()
 
         # Wait until we want to start
-        print("Press Button to start")
+        print("» Press Button to start")
         sensors.button_pressed()
+        print("Lets start to explore...")
 
         # Main robot loop
         while self.running:
@@ -53,6 +67,7 @@ class Robot:
             if self.us.get_distance() < 15:
                 # Rotate robot to drive back, and save that an obstacle was detected
                 self.sound.play("/home/robot/src/found.wav")
+                print("Obstacle decteced")
                 self.cs.rotate_to_path(180)
                 bottle_detected = True
                 continue
@@ -226,6 +241,7 @@ class Robot:
         # Test if mothership overwrites direction, use forced direction
         if self.path_choice is not None:
             choice = self.path_choice
+        print("Next direction: %s" % Direction(choice))
 
         # Reset Variable
         self.path_choice = None

@@ -72,13 +72,17 @@ class Communication:
             return
 
         # Debug message print
-        print("<<< " + message.payload.decode('utf-8'))
+        # print("<<< " + message.payload.decode('utf-8'))
 
         # Get type of payload
         payload_type = payload["type"]
 
+        # debug-Messages
+        if payload["from"] == "debug":
+            # Debug message print
+            print("<<< " + message.payload.decode('utf-8'))
         # ready-Message
-        if payload_type == "planet":
+        elif payload_type == "planet":
             """
             Contains information about the planet name
             and the start position and orientation
@@ -102,6 +106,8 @@ class Communication:
             # Save information to robot
             self.robot.start_location = ((start_x, start_y), start_dir)
             self.robot.planet_name = payload["payload"]["planetName"]
+
+            print("Node reached: X: {0} Y: {1}".format(start_x, start_y))
 
             # Subscribe to planet channel
             self.client.subscribe('planet/%s/117' % self.robot.planet_name, qos=2)
@@ -146,6 +152,8 @@ class Communication:
             self.robot.planet.remove_unexplored_edge(start, end)
             # Save information to robot
             self.robot.end_location = end
+
+            print("Node reached: X: {0} Y: {1}".format(end_x, end_y))
         # pathSelect-Message
         elif payload_type == "pathSelect":
             """
@@ -161,6 +169,8 @@ class Communication:
 
             # Read and save information to robot
             self.robot.path_choice = payload["payload"]["startDirection"]
+
+            print("Direction overwritten")
         # pathUnveiled-Message
         elif payload_type == "pathUnveiled":
             """
@@ -199,6 +209,8 @@ class Communication:
             self.robot.planet.add_path(start, end, weight)
             # Remove path from unexplored edges
             self.robot.planet.remove_unexplored_edge(start, end)
+
+            print("Path unveiled: From: X: {0} Y: {1}, To: X: {2} Y: {3}".format(start_x, start_y, end_x, end_y))
         # target-Message
         elif payload_type == "target":
             """
@@ -219,6 +231,8 @@ class Communication:
 
             # Save information to robot
             self.robot.planet.target = (target_x, target_y)
+
+            print("Target set: X: {0} Y: {1}".format(target_x, target_y))
         # done-Message
         elif payload_type == "done":
             """
@@ -234,8 +248,9 @@ class Communication:
 
             # Read information from payload
             msg = payload["payload"]["message"]
+
             # Print message
-            print(msg)
+            print("Planet done 🎆: %s" % msg)
 
             # Save information to robot
             self.robot.running = False
@@ -418,7 +433,7 @@ class Communication:
         # YOUR CODE FOLLOWS
 
         # Debug message print
-        print(">>> " + json.dumps(message))
+        # print(">>> " + json.dumps(message))
 
         # Publish message to topic
         self.client.publish(topic, payload=json.dumps(message), qos=1)

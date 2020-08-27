@@ -86,6 +86,11 @@ class Motors:
         self.lm.stop()
 
     def turn_angle(self, speed: float, angle: float):
+        if angle > 180:
+            angle -= 360
+        if angle < -180:
+            angle += 360
+
         self.rm.position_sp = -angle * 2  # 2 for speed = 100 (2.2 calculated and tested?)
         self.lm.position_sp = angle * 2  # for one rotation -> wheels 2.2 rotations
         self.rm.speed_sp = speed
