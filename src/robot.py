@@ -67,7 +67,7 @@ class Robot:
             if self.us.get_distance() < 15:
                 # Rotate robot to drive back, and save that an obstacle was detected
                 self.sound.play("/home/robot/src/assets/found.wav")
-                print("Obstacle decteced")
+                print("Obstacle detected")
                 self.cs.rotate_to_path(180)
                 bottle_detected = True
                 continue
