@@ -66,7 +66,7 @@ class Robot:
             # Test if robot detect an obstacle
             if self.us.get_distance() < 15:
                 # Rotate robot to drive back, and save that an obstacle was detected
-                self.sound.play("/home/robot/src/found.wav")
+                self.sound.play("/home/robot/src/assets/found.wav")
                 print("Obstacle decteced")
                 self.cs.rotate_to_path(180)
                 bottle_detected = True
@@ -144,7 +144,7 @@ class Robot:
                     # Wait until confirmation
                     while self.running:
                         pass
-                    self.sound.speak("Target reached")
+                    self.sound.play("/home/robot/src/assets/smb_stage_clear.wav")
                     continue
 
                 # Calculate next direction based on planet information and posible directions
@@ -158,7 +158,7 @@ class Robot:
                     # Wait until confirmation
                     while self.running:
                         pass
-                    self.sound.speak("Exloration completed")
+                    self.sound.play("/home/robot/src/assets/metroid.wav")
                     continue
 
                 # Save new starting postion for next path
@@ -247,6 +247,6 @@ class Robot:
         self.path_choice = None
 
         # Play sound
-        self.sound.beep()
+        self.sound.play("/home/robot/src/assets/codecover.wav")
 
         return choice
