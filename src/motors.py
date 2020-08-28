@@ -46,8 +46,8 @@ class Motors:
         previous_brightness = math.sqrt(r**2 + g**2 + b**2)
 
         # Setup multipliers for Controller
-        multiplier_p = 0.4
-        multiplier_d = 0.2
+        multiplier_p = 0.4 #0.4
+        multiplier_d = 0.2 #0.2
 
         # duration/10 second intervals (duration in seconds)
         for i in range(0, int(duration*10)):
