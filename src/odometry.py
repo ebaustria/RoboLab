@@ -122,7 +122,7 @@ class Odometry:
 
         dir = self.get_cardinal_point(gamma_in_grad, old_dir)
 
-        unit = 45
+        unit = 50
         if old_dir == Direction.NORTH:
             x += round(dif_x / unit)
             y += round(dif_y / unit)

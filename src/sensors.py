@@ -46,7 +46,7 @@ class ColorSensor:
         return self.cs.bin_data("hhh")
 
     def get_neighbour_nodes(self):
-        nodes = self.motors.detect_nodes(100, self)
+        nodes = self.motors.detect_nodes(200, self)
 
         angles = []
         for node in nodes:
