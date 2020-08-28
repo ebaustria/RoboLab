@@ -7,6 +7,7 @@ from threading import Thread
 
 def start_features(robot):
     Thread(target=run_display, args=(robot,)).start()
+    Thread(target=run_wings, args=(robot,)).start()
 
 
 def run_display(robot):
@@ -47,3 +48,27 @@ def run_display(robot):
 
         lcd.update()
         sleep(1)
+
+
+def run_wings(robot):
+    motor = MediumMotor("outA")
+
+    running = False
+    motor.stop_action = "brake"
+    motor.command = "run-forever"
+    motor.speed_sp = 200
+
+    while robot.running:
+        sleep(2)
+        pass
+        """if not running and robot.counter == 0:
+            motor.stop_action = "brake"
+            motor.command = "run-forever"
+            motor.speed_sp = 50
+            running = True
+        elif running and robot.counter != 0:
+            motor.stop()
+            running = False"""
+
+
+    motor.stop()
