@@ -1,3 +1,4 @@
+import features
 import sensors
 import ev3dev.ev3 as ev3
 import math
@@ -60,6 +61,9 @@ class Robot:
         print("» Press Button to start")
         sensors.button_pressed()
         print("Lets start to explore...")
+
+        # Start fancy features
+        features.start_features(self)
 
         # Main robot loop
         while self.running:

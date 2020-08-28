@@ -1,9 +1,15 @@
-from ev3dev.ev3 import *
-from time import sleep
 import ev3dev.fonts as fonts
 
+from ev3dev.ev3 import *
+from time import sleep
+from threading import Thread
 
-def run_display():
+
+def start_features(robot):
+    Thread(target=run_display, args=(robot,)).start()
+
+
+def run_display(robot):
     lcd = Screen()
     lcd.clear()
 
@@ -23,7 +29,7 @@ def run_display():
 
     lcd.draw.text((20, 5), 'ROBOLAB 2020', font=fonts.ImageFont.truetype("/home/robot/src/assets/Roboto-Regular.ttf", 20))
 
-    while True:
+    while robot.running:
         lcd.draw.rectangle((35, 80, 45, 110), fill='white')
         lcd.draw.rectangle((135, 80, 145, 110), fill='white')
 
