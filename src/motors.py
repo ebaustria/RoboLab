@@ -8,92 +8,124 @@ from odometry import Odometry
 class Motors:
 
     def __init__(self, odometry: Odometry):
+        # Setup Motors
         self.rm = ev3.LargeMotor("outB")
         self.lm = ev3.LargeMotor("outC")
 
+        # Setup Odometry
         self.odometry = odometry
 
     def drive_forward(self, speed: float, duration: float):
+        # Reset Motors
         self.rm.reset()
         self.lm.reset()
 
+        # Set stop action
         self.rm.stop_action = "brake"
         self.lm.stop_action = "brake"
+
+        # Set given speed
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
+
+        # Run until stop command
         self.rm.command = "run-forever"
         self.lm.command = "run-forever"
 
+        # Sleep for a given time while motors running
         time.sleep(duration)
 
+        # Stop Motors
         self.rm.stop()
         self.lm.stop()
 
-    # in progress (PID-Controller)
+    # PID Controller (with P and D component)
     def follow_line(self, duration: float, cs, ticks_previous_l: int, ticks_previous_r: int):
+        # initialize previous_brightness (for D component)
         r, g, b = cs.get_colors()
-        previous_brightness = math.sqrt(r**2 + g**2 + b**2)  # for D-Controller
-        # previous_error_d = 0
-        # right_speed = 0
-        # left_speed = 0
+        previous_brightness = math.sqrt(r**2 + g**2 + b**2)
 
-        # duration in 10 intervals separated
+        # Setup multipliers for Controller
+        multiplier_p = 0.4
+        multiplier_d = 0.2
+
+        # duration/10 second intervals (duration in seconds)
         for i in range(0, int(duration*10)):
+            # Get brightness
             r, g, b = cs.get_colors()
             brightness = math.sqrt(r**2 + g**2 + b**2)
 
-            multiplicator_p = 0.4
-            multiplicator_d = 0.2
-
+            # Calculate Error for P and D component
             error_p = brightness - 350
             error_d = brightness - previous_brightness
-            # error_d = error_d-previous_error_d
-            turn = multiplicator_p*error_p + multiplicator_d*error_d  # (change y)/(change x)*error
 
-            # maybe I-Controller instead
+            # Calculate turn
+            turn = multiplier_p*error_p + multiplier_d*error_d  # (change y)/(change x)*error
 
+            # Slow down if driving in very bright of very dark area (changing offset)
             if 150 < brightness <= 450:
                 offset = 200
             else:
                 offset = 150
 
+            # Calculate speed
             right_speed = offset + turn
             left_speed = offset - turn
+
+            # Set speed to Motors
             self.rm.speed_sp = right_speed
             self.lm.speed_sp = left_speed
+
+            # Run until stop command
             self.rm.command = "run-forever"
             self.lm.command = "run-forever"
 
+            # Sleep for a given time while motors running
             time.sleep(duration/10)
 
+            # Overwrite old brightness value for calculating D component in next interval
             previous_brightness = brightness
-            # previous_error_d = error_d
 
+            # Get absolute driven angles for each Motor in this interval
             ticks_l, ticks_r = self.odometry.get_position()
+
+            # Add relative driven angles to Odometry
             self.odometry.add_point(((ticks_l-ticks_previous_l), (ticks_r-ticks_previous_r)))
+
+            # Overwrite old tick values for calculating relative driven angles in next interval
             ticks_previous_l = ticks_l
             ticks_previous_r = ticks_r
 
+        # ticks have to be returned because follow_line is multiple times called
         return ticks_previous_l, ticks_previous_r
 
+    # Stop Robot
     def stop(self):
+        # Reset Motors
         self.rm.reset()
         self.lm.reset()
+
+        # Stop Motors
         self.rm.stop()
         self.lm.stop()
 
-    # Turn the robot by a given angle to provide a tolerance before turning to the edge that was selected to drive down
-    # next.
+    # Turn the Robot to a given angle with a given speed
     def turn_angle(self, speed: float, angle: float):
+        # rotate efficient (angle <= 180)
         if angle > 180:
             angle -= 360
         if angle < -180:
             angle += 360
 
-        self.rm.position_sp = -angle * 2  # 2 for speed = 100 (2.2 calculated and tested?)
-        self.lm.position_sp = angle * 2  # for one rotation -> wheels 2.2 rotations
+        # 2 Motor rotations = 1 Robot rotation
+        self.rm.position_sp = -angle * 2
+        self.lm.position_sp = angle * 2
+
+        # Set given speed
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
+
+        # Run Motors until angle reached
         self.rm.command = "run-to-rel-pos"
         self.lm.command = "run-to-rel-pos"
 
@@ -101,15 +133,22 @@ class Motors:
 
     # Turn the robot while it is scanning for edges and return the motor positions where edges are detected.
     def detect_nodes(self, speed: float, cs):
+        # Reset Motor positions to 0
         self.odometry.reset_position()
 
+        # 1 Robot rotation
         self.rm.position_sp = 360 * 2
         self.lm.position_sp = -360 * 2
+
+        # Set given speed
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
+
+        # Run Motors until angle reached
         self.rm.command = "run-to-rel-pos"
         self.lm.command = "run-to-rel-pos"
 
+        # Get measured angles (relative to Robot) where edges are detected
         nodes = []
         while self.rm.is_running:
             if cs.get_brightness() < 200:
@@ -117,29 +156,38 @@ class Motors:
 
         return nodes
 
-    # Turn the robot until it detects the edge it has selected to drive down next.
+    # Turn the robot until it detects the next edge
     def turn_until_path_found(self, speed: float, cs):
+        # Reset Motor positions to 0
         self.odometry.reset_position()
 
+        # 1 Robot rotation
         self.rm.position_sp = 360 * 2
         self.lm.position_sp = -360 * 2
+
+        # Set given speed
         self.rm.speed_sp = speed
         self.lm.speed_sp = speed
+
+        # Run Motors until angle reached
         self.rm.command = "run-to-rel-pos"
         self.lm.command = "run-to-rel-pos"
 
+        # Turn until it detects the next edge
         while self.rm.is_running:
             if cs.get_brightness() < 200:
                 self.stop()
 
     # Reposition the robot after reaching a node so that all possible edges can be detected by the color sensor.
     def drive_in_center_of_node(self, speed: float, duration: float):
+        # Stop Motors
         self.stop()
 
+        # Continue Odometry measurement while driving forward with a given speed and duration
         previous_ticks_l, previous_ticks_r = self.odometry.get_position()
         self.drive_forward(speed, duration)
-
         ticks_l, ticks_r = self.odometry.get_position()
         self.odometry.add_point((ticks_l - previous_ticks_l, ticks_r - previous_ticks_r))
 
+        # Stop Motors
         self.stop()
