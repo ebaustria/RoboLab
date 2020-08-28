@@ -29,9 +29,6 @@ class Motors:
         self.rm.stop()
         self.lm.stop()
 
-    def drive_backward(self, speed: float, duration: float):
-        self.drive_forward(-speed, duration)
-
     # in progress (PID-Controller)
     def follow_line(self, duration: float, cs, ticks_previous_l: int, ticks_previous_r: int):
         r, g, b = cs.get_colors()
@@ -85,6 +82,8 @@ class Motors:
         self.rm.stop()
         self.lm.stop()
 
+    # Turn the robot by a given angle to provide a tolerance before turning to the edge that was selected to drive down
+    # next.
     def turn_angle(self, speed: float, angle: float):
         if angle > 180:
             angle -= 360
@@ -100,6 +99,7 @@ class Motors:
 
         self.rm.wait_until_not_moving()
 
+    # Turn the robot while it is scanning for edges and return the motor positions where edges are detected.
     def detect_nodes(self, speed: float, cs):
         self.odometry.reset_position()
 
@@ -117,6 +117,7 @@ class Motors:
 
         return nodes
 
+    # Turn the robot until it detects the edge it has selected to drive down next.
     def turn_until_path_found(self, speed: float, cs):
         self.odometry.reset_position()
 
@@ -131,6 +132,7 @@ class Motors:
             if cs.get_brightness() < 200:
                 self.stop()
 
+    # Reposition the robot after reaching a node so that all possible edges can be detected by the color sensor.
     def drive_in_center_of_node(self, speed: float, duration: float):
         self.stop()
 
