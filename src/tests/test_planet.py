@@ -62,7 +62,6 @@ class TestRoboLabPlanet(unittest.TestCase):
         self.planet.add_path(((0, 0), Direction.NORTH), ((0, 2), Direction.SOUTH), 1)
         self.planet.add_path(((0, 2), Direction.EAST), ((2, 2), Direction.WEST), 4)
         self.planet.add_path(((2, 2), Direction.SOUTH), ((2, 0), Direction.NORTH), 2)
-        # self.planet.add_path(((1, 2), Direction.WEST), ((1, 2), Direction.NORTH), 1)
 
         """
                 planet same:

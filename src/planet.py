@@ -255,7 +255,7 @@ class Planet:
         return False
 
     # Calculates the distance of the shortest path between a start point and a target point.
-    def shortest_distance(self, start: Tuple[int, int], target: Tuple[int, int]):
+    def shortest_distance(self, start: Tuple[int, int], target: Tuple[int, int]) -> Union[int, float]:
         shortest = self.shortest_path(start, target)
 
         if shortest is None:
