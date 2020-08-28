@@ -107,6 +107,7 @@ class Communication:
             self.robot.start_location = ((start_x, start_y), start_dir)
             self.robot.planet_name = payload["payload"]["planetName"]
 
+            print("Planet: %s" % self.robot.planet_name)
             print("Node reached: X: {0} Y: {1}".format(start_x, start_y))
 
             # Subscribe to planet channel
