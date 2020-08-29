@@ -60,7 +60,7 @@ class Motors:
         if 150 < brightness <= 450:
             offset = 200
         else:
-            offset = 120  # 150
+            offset = 130  # 150
 
         # Calculate speed
         right_speed = offset + turn
@@ -124,8 +124,8 @@ class Motors:
         self.odometry.reset_position()
 
         # 1 Robot rotation
-        self.rm.position_sp = 360 * 2
-        self.lm.position_sp = -360 * 2
+        self.rm.position_sp = 360 * 2.15  # 360 * 2
+        self.lm.position_sp = -360 * 2.15  # -360 * 2
 
         # Set given speed
         self.rm.speed_sp = speed
@@ -139,7 +139,7 @@ class Motors:
         nodes = []
         while self.rm.is_running:
             if cs.get_brightness() < 200:
-                nodes.append(self.rm.position / 2)
+                nodes.append(self.rm.position / 2.15)  # self.rm.position / 2
 
         return nodes
 
