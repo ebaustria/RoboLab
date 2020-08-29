@@ -40,64 +40,51 @@ class Motors:
         self.lm.stop()
 
     # PID Controller (with P and D component)
-    def follow_line(self, duration: float, cs, ticks_previous_l: int, ticks_previous_r: int):
-        # initialize previous_brightness (for D component)
-        r, g, b = cs.get_colors()
-        previous_brightness = math.sqrt(r**2 + g**2 + b**2)
-
+    def follow_line(self, cs, ticks_previous_l: int, ticks_previous_r: int, previous_brightness: int):
         # Setup multipliers for Controller
         multiplier_p = 0.4  # 0.4
         multiplier_d = 0.15  # 0.2
 
-        # duration/10 second intervals (duration in seconds)
-        for i in range(0, int(duration*10)):
-            # Get brightness
-            r, g, b = cs.get_colors()
-            brightness = math.sqrt(r**2 + g**2 + b**2)
+        # Get brightness
+        r, g, b = cs.get_colors()
+        brightness = math.sqrt(r**2 + g**2 + b**2)
 
-            # Calculate Error for P and D component
-            error_p = brightness - 350
-            error_d = brightness - previous_brightness
+        # Calculate Error for P and D component
+        error_p = brightness - 350
+        error_d = brightness - previous_brightness
 
-            # Calculate turn
-            turn = multiplier_p*error_p + multiplier_d*error_d  # (change y)/(change x)*error
+        # Calculate turn
+        turn = multiplier_p*error_p + multiplier_d*error_d  # (change y)/(change x)*error
 
-            # Slow down if driving in very bright of very dark area (changing offset)
-            if 150 < brightness <= 450:
-                offset = 200
-            else:
-                offset = 120  # 150
+        # Slow down if driving in very bright of very dark area (changing offset)
+        if 150 < brightness <= 450:
+            offset = 200
+        else:
+            offset = 120  # 150
 
-            # Calculate speed
-            right_speed = offset + turn
-            left_speed = offset - turn
+        # Calculate speed
+        right_speed = offset + turn
+        left_speed = offset - turn
 
-            # Set speed to Motors
-            self.rm.speed_sp = right_speed
-            self.lm.speed_sp = left_speed
+        # Set speed to Motors
+        self.rm.speed_sp = right_speed
+        self.lm.speed_sp = left_speed
 
-            # Run until stop command
-            self.rm.command = "run-forever"
-            self.lm.command = "run-forever"
+        # Run until stop command
+        self.rm.command = "run-forever"
+        self.lm.command = "run-forever"
 
-            # Sleep for a given time while motors running
-            time.sleep(duration/10)
+        # Sleep for a given time while motors running
+        time.sleep(0.02)  # duration/10
 
-            # Overwrite old brightness value for calculating D component in next interval
-            previous_brightness = brightness
+        # Get absolute driven angles for each Motor in this interval
+        ticks_l, ticks_r = self.odometry.get_position()
 
-            # Get absolute driven angles for each Motor in this interval
-            ticks_l, ticks_r = self.odometry.get_position()
-
-            # Add relative driven angles to Odometry
-            self.odometry.add_point(((ticks_l-ticks_previous_l), (ticks_r-ticks_previous_r)))
-
-            # Overwrite old tick values for calculating relative driven angles in next interval
-            ticks_previous_l = ticks_l
-            ticks_previous_r = ticks_r
+        # Add relative driven angles to Odometry
+        self.odometry.add_point(((ticks_l-ticks_previous_l), (ticks_r-ticks_previous_r)))
 
         # ticks have to be returned because follow_line is multiple times called
-        return ticks_previous_l, ticks_previous_r
+        return ticks_l, ticks_r, brightness
 
     # Stop Robot
     def stop(self):

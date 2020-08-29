@@ -39,7 +39,7 @@ class Robot:
 
     def run(self):
         bottle_detected = False
-        ticks_previous_l, ticks_previous_r = 0, 0
+        previous_l, previous_r, previous_b = 0, 0, 350
 
         start_message = """
 ##################################
@@ -177,7 +177,7 @@ class Robot:
                 self.odometry.reset_position()
             else:
                 # Follow line and save last data for next tick
-                ticks_previous_l, ticks_previous_r = self.motors.follow_line(0.4, self.cs, ticks_previous_l, ticks_previous_r)
+                previous_l, previous_r, previous_b = self.motors.follow_line(self.cs, previous_l, previous_r, previous_b)
                 # new (better solution?) -> multiple times calles -> ticks_previous needed
                 self.counter = 0
 
