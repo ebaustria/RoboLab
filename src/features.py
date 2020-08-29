@@ -1,5 +1,4 @@
-import ev3dev.fonts as fonts
-
+from ev3dev.fonts import ImageFont
 from ev3dev.ev3 import *
 from time import sleep
 from threading import Thread
@@ -7,7 +6,7 @@ from threading import Thread
 
 def start_features(robot):
     Thread(target=run_display, args=(robot,)).start()
-    Thread(target=run_wings, args=(robot,)).start()
+    run_wings()
 
 
 def run_display(robot):
@@ -28,7 +27,7 @@ def run_display(robot):
     lcd.draw.rectangle((115, 60, 125, 110), fill='black')
     lcd.draw.rectangle((125, 70, 135, 90), fill='black')
 
-    lcd.draw.text((20, 5), 'ROBOLAB 2020', font=fonts.ImageFont.truetype("/home/robot/src/assets/Roboto-Regular.ttf", 20))
+    lcd.draw.text((20, 5), 'ROBOLAB 2020', font=ImageFont.truetype("/home/robot/src/assets/Roboto-Regular.ttf", 20))
 
     while robot.running:
         lcd.draw.rectangle((35, 80, 45, 110), fill='white')
@@ -50,23 +49,9 @@ def run_display(robot):
         sleep(1)
 
 
-def run_wings(robot):
+def run_wings():
     motor = MediumMotor("outA")
 
-    running = False
     motor.stop_action = "brake"
     motor.command = "run-forever"
     motor.speed_sp = 200
-
-    #while robot.running:
-    #    sleep(2)
-     #   pass
-    """if not running and robot.counter == 0:
-        motor.stop_action = "brake"
-        motor.command = "run-forever"
-        motor.speed_sp = 50
-        running = True
-    elif running and robot.counter != 0:
-        motor.stop()
-        running = False"""
-    #motor.stop()

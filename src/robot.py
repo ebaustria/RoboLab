@@ -35,9 +35,9 @@ class Robot:
         self.end_location = None
         self.path_choice = None
         self.running = True
-        self.counter = 0
 
     def run(self):
+        counter = 0
         bottle_detected = False
         previous_l, previous_r, previous_b = 0, 0, 350
 
@@ -77,8 +77,8 @@ class Robot:
                 continue
 
             # Test if robot reached node
-            if self.cs.get_node() in ["blue", "red"] and self.counter == 0:
-                self.counter += 1
+            if self.cs.get_node() in ["blue", "red"] and counter == 0:
+                counter += 1
 
                 # Drive to center of node to better scanning
                 self.motors.drive_in_center_of_node(100, 2)
@@ -179,7 +179,7 @@ class Robot:
                 # Follow line and save last data for next tick
                 previous_l, previous_r, previous_b = self.motors.follow_line(self.cs, previous_l, previous_r, previous_b)
                 # new (better solution?) -> multiple times calles -> ticks_previous needed
-                self.counter = 0
+                counter = 0
 
     def choose_dir(self):
         # Next direction, -1 = no direction found
