@@ -73,16 +73,10 @@ class Odometry:
         dif_x, dif_y = 0, 0
         gamma, gamma_old = 0, 0
 
-        # test start
         l = self.get_tupel_list()
         for i in range(10, len(l)):
             ticks_l = l[i][0]
             ticks_r = l[i][1]
-        # test end
-
-        # for tupel in :
-        #    ticks_l = tupel[0]
-        #    ticks_r = tupel[1]
 
             dif_x += self.get_dif_x(gamma_old, ticks_l, ticks_r)
             dif_y += self.get_dif_y(gamma_old, ticks_l, ticks_r)

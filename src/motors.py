@@ -43,7 +43,7 @@ class Motors:
     def follow_line(self, cs, ticks_previous_l: int, ticks_previous_r: int, previous_brightness: int):
         # Setup multipliers for Controller
         multiplier_p = 0.4  # 0.4
-        multiplier_d = 0.15  # 0.2
+        multiplier_d = 0.2  # 0.15
 
         # Get brightness
         r, g, b = cs.get_colors()
@@ -75,7 +75,7 @@ class Motors:
         self.lm.command = "run-forever"
 
         # Sleep for a given time while motors running
-        time.sleep(0.02)  # duration/10
+        time.sleep(0.01)  # duration/10
 
         # Get absolute driven angles for each Motor in this interval
         ticks_l, ticks_r = self.odometry.get_position()

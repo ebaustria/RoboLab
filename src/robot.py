@@ -60,6 +60,9 @@ class Robot:
         # Wait until we want to start
         print("» Press Button to start")
         sensors.button_pressed()
+        start_time = time.time()
+        print(time.strftime("Starttime: %H:%M:%S", time.localtime()))
+
         print("Lets start to explore...")
 
         # Start fancy features
@@ -189,6 +192,10 @@ class Robot:
                 previous_l, previous_r, previous_b = self.motors.follow_line(self.cs, previous_l, previous_r, previous_b)
                 # new (better solution?) -> multiple times calles -> ticks_previous needed
                 counter = 0
+
+        print(time.strftime("Endtime: %H:%M:%S", time.localtime()))
+        delta = (time.time() - start_time) / 60
+        print("Timedelta: %.2f min" % delta)
 
         for thread in feature_threads:
             thread.join()
