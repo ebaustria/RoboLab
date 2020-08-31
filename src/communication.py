@@ -63,7 +63,6 @@ class Communication:
         :return: void
         """
         payload = json.loads(message.payload.decode('utf-8'))
-        self.logger.debug(json.dumps(payload, indent=2))
 
         # YOUR CODE FOLLOWS
 
@@ -71,8 +70,11 @@ class Communication:
         if payload["from"] == "client":
             return
 
+        self.logger.debug('Receive from: ' + message.topic)
+        self.logger.debug(json.dumps(payload, indent=2))
+
         # Debug message print
-        print("<<< " + message.payload.decode('utf-8'))
+        # print("<<< " + message.payload.decode('utf-8'))
 
         # Get type of payload
         payload_type = payload["type"]
@@ -434,7 +436,7 @@ class Communication:
         # YOUR CODE FOLLOWS
 
         # Debug message print
-        print(">>> " + json.dumps(message))
+        # print(">>> " + json.dumps(message))
 
         # Publish message to topic
         self.client.publish(topic, payload=json.dumps(message), qos=2)
