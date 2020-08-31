@@ -5,8 +5,11 @@ from threading import Thread
 
 
 def start_features(robot):
-    Thread(target=run_display, args=(robot,)).start()
+    t = Thread(target=run_display, args=(robot,))
+    t.start()
     run_wings()
+
+    return [t]
 
 
 def run_display(robot):

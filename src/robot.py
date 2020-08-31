@@ -63,7 +63,7 @@ class Robot:
         print("Lets start to explore...")
 
         # Start fancy features
-        features.start_features(self)
+        feature_threads = features.start_features(self)
 
         # Main robot loop
         while self.running:
@@ -108,7 +108,7 @@ class Robot:
                     if self.start_location[0] in self.planet.planet_dict \
                             and self.start_location[1] in self.planet.planet_dict[self.start_location[0]]:
                         # Get end node from planet dictionary
-                        ((x, y), send_dir) = self.planet.planet_dict[self.start_location[0]][self.start_location[1]]
+                        ((x, y), send_dir, _) = self.planet.planet_dict[self.start_location[0]][self.start_location[1]]
 
                         # Reset odometry of last path, not used for first path
                         self.odometry.reset_list()
@@ -190,6 +190,9 @@ class Robot:
                 # new (better solution?) -> multiple times calles -> ticks_previous needed
                 counter = 0
 
+        for thread in feature_threads:
+            thread.join()
+
     def choose_dir(self):
         # Next direction, -1 = no direction found
         choice = -1
@@ -244,7 +247,7 @@ class Robot:
                 choice = self.planet.shortest_next_dir(self.end_location[0], nearest)
 
         # Send pathSelect to mothership
-        self.communication.send_path_select(((self.end_location[0][0], self.end_location[0][1]), choice))
+        self.communication.send_path_select((self.end_location[0], choice))
 
         # Wait until message receive or 3sec (answer optional)
         start_time = time.time()

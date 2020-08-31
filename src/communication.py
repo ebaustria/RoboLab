@@ -72,7 +72,7 @@ class Communication:
             return
 
         # Debug message print
-        # print("<<< " + message.payload.decode('utf-8'))
+        print("<<< " + message.payload.decode('utf-8'))
 
         # Get type of payload
         payload_type = payload["type"]
@@ -434,10 +434,10 @@ class Communication:
         # YOUR CODE FOLLOWS
 
         # Debug message print
-        # print(">>> " + json.dumps(message))
+        print(">>> " + json.dumps(message))
 
         # Publish message to topic
-        self.client.publish(topic, payload=json.dumps(message), qos=1)
+        self.client.publish(topic, payload=json.dumps(message), qos=2)
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #
