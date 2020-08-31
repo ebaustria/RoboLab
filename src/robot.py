@@ -104,12 +104,21 @@ class Robot:
                     # Save path as blocked for better path calculation
                     self.planet.add_path(self.end_location, self.end_location, -1)
                 else:
-                    # Calculate postion and direction from odometry
-                    x, y, forward_dir = self.odometry.calculate_path(
-                        self.start_location[1], bottle_detected, self.start_location[0][0], self.start_location[0][1])
+                    # Test if path is known
+                    if self.start_location[0] in self.planet.planet_dict \
+                            and self.start_location[1] in self.planet.planet_dict[self.start_location[0]]:
+                        # Get end node from planet dictionary
+                        ((x, y), send_dir) = self.planet.planet_dict[self.start_location[0]][self.start_location[1]]
 
-                    # Direction facing back, used for path-message
-                    send_dir = (forward_dir + 180) % 360
+                        # Reset odometry of last path, not used for first path
+                        self.odometry.reset_list()
+                    else:
+                        # Calculate postion and direction from odometry
+                        x, y, forward_dir = self.odometry.calculate_path(
+                            self.start_location[1], bottle_detected, self.start_location[0][0], self.start_location[0][1])
+
+                        # Direction facing back, used for path-message
+                        send_dir = (forward_dir + 180) % 360
 
                     # Send path to mothership get real position and direction
                     self.communication.send_path(self.start_location, ((x, y), send_dir), bottle_detected)
