@@ -1,13 +1,3 @@
-# RoboLab Spring Template
+# RoboLab-Praktikum
 
-Template for the RoboLab course in spring which is conducted by the Systems Engineering Group at the Department of Computer Science, TU Dresden.
-
-* Acts as a base repository that groups clone and then set the upstream to their assigned repo afterwards.
-* Provides scripts to speed up and automate the process of deploying as well as executing Python code on LEGO MINDSTORMS EV3 robots running the customized, Debian based operating system.
-* Includes the programming interface which is used to check parts of the students solutions in the final exam.
-
-
-## Help
-
-Please consult the [RoboLab Docs](https://robolab.inf.tu-dresden.de/inf).
-We provide extensive sections about this template, the deploy script and the interfaces.
+Dieses Repo enthält den Code von meiner Gruppe für das Robolab-Praktikum im Sommersemester 2020. Ich habe den Code in src/tests/test_planet.py und src/planet.py geschrieben, und ich habe auch zum Hauptalgorithmus des Programms in src/robot.py beigetragen.
